@@ -1,5 +1,7 @@
 // Must set properties / Precompiled Headers / Precompiled Header / Not using...
-// Astronomy calculations based on Duffet-Smith and Zwart, "Practical Astronomy"
+// Astronomy calculations based on Duffett-Smith and Zwart, "Practical Astronomy"
+
+#include "AstroCalc.h"
 
 int version()
 {
