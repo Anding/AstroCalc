@@ -4,7 +4,8 @@
 LIBRARY: AstroCalc.dll
 
 Extern: int "C" version( ) ;
-Extern: int "C" daysSinceEpoch ( int yymmdd) ;
+Extern: int "C" days_since_epoch ( int yymmdd) ;
+Extern: int "C" date_after_epoch ( int days) ;
 
  CR
 ." AstroCalc.dll load address " AstroCalc.dll u. CR
