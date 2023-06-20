@@ -1,4 +1,8 @@
  CR
+." AstroCalc.dll load address " AstroCalc.dll u. CR
+.BadExterns CR
+
+ CR
 
 version ~.  ( 0 1 1)
  CR
