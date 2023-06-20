@@ -17,11 +17,9 @@ int main()
     JDCD(&day, &month, &year, 2455002.25);
     printf("JD 2,455,002.25 is calendar date %d_%d_%f\n", year, month, day);
 
-    int days = days_since_epoch(7232779);
-    printf("2009-06-19 (encoded as 7232779) is %d days since the epoch\n", days);
+    double GST = UTGST(2444351.5, 14, 36, 52);
+    printf("GST at JD 24443511.5 14:36:52 is %f\n", GST);
 
-    int r = date_after_epoch(-195);
-    printf("-195 days after the Epoch is the date encoded as %d\n", r);
 }
 
 

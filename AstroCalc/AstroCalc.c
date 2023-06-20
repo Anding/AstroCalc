@@ -3,17 +3,6 @@
 
 #include "AstroCalc.h"
 
-int version()
-{
-    int main_version = 0;
-    int minor_version = 1;
-    int release = 1;
-    int version_number = release + 60 * (minor_version + 60 * main_version);
-
-    return version_number;
-
-}
-
 // Convert a calendar date at Greenwich to a Julian Date; PA 4
 double CDJD(double GD, int GM, int GY)
 // The date must be in the Gregorian calendar (after 1582-10-15)
@@ -75,7 +64,33 @@ void JDCD(double* GD, int* GM, int* GY, double JD)
     *GM = mm;
     *GY = yy;
 }
-;
+
+// Obtain GST given the Julian date at 0h and UT; PA 12
+double UTGST(double JD, int h, int m, int s)
+{
+    double S = 0.0, T = 0.0, T0 = 0.0, UT = 0.0, A = 0.0, GST = 0.0;
+    S = JD - 2451545.0;
+    T = S / 36525.0;
+    T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
+    T0 = fmod(T0, 24.0);
+    UT = ((s / 60.0) + m) / 60 + h;
+    UT = UT * 1.002737909;
+    T0 = T0 + UT;
+    GST = fmod(T0, 24.0);
+    return(GST);
+}
+
+// Return a version number
+int version()
+{
+    int main_version = 0;
+    int minor_version = 1;
+    int release = 1;
+    int version_number = release + 60 * (minor_version + 60 * main_version);
+
+    return version_number;
+
+}
 
 // Convert at calendar date at Greenwich to the number of days since the EPOCH
 int days_since_epoch(int yyyymmdd)
@@ -100,4 +115,22 @@ int date_after_epoch(int days)
     JDCD(&GD, &GM, &GY, JD);
     r = ((int)trunc(GD)) + (60 * (GM + 60 * GY));
     return (r);
+}
+
+// Obtain GST given the days since the Epoch and UT at Greenwich
+int UTtoGST(int D, int T)
+// T is UT expressed as an integer number of seconds since 0h
+// GST is returned as an integer number of seconds since 0h
+{
+    double JD = 0.0, GST = 0.0;
+    int h = 0, m = 0, s = 0, A = 0, r = 0;
+
+    JD = EPOCH + D;
+    s = T % 60;
+    A = T / 60;
+    m = A % 60;
+    h = A / 60;
+    GST = UTGST(JD, h, m, s);
+    r = trunc(GST * 3600);
+    return(r);
 }
