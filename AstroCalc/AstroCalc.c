@@ -131,6 +131,6 @@ int UTtoGST(int D, int T)
     m = A % 60;
     h = A / 60;
     GST = UTGST(JD, h, m, s);
-    r = trunc(GST * 3600);
+    r = (int)trunc(GST * 3600.0 + 0.5);
     return(r);
 }

@@ -4,6 +4,9 @@
 \ Interface with the C language library rountines *******************************************************
 
 LIBRARY: AstroCalc.dll
+	
+\ return a library version number in yymmdd format
+Extern: int "C" version( ) ;
 
 \ return the number of days since the Epoch of a calendar date
 Extern: int "C" days_since_epoch ( int yymmdd) ;
@@ -15,9 +18,10 @@ Extern: int "C" days_since_epoch ( int yymmdd) ;
 \ return the calendar date ( yymmdd format) of a number of days since the Epoch
 Extern: int "C" date_after_epoch ( int days) ;
 
-\ return a library version number in yymmdd format
-Extern: int "C" version( ) ;
-
+\ return the GST of a given date and time at Greenwich
+Extern: int "C" UTtoGST (int D, int UT) ;
+\ D is the date expressed as number of days since the epoch
+\ T is Ut expressed as seconds-of-the day
 
 \ Canonical date and time representations ***************************************************************
 

@@ -1,8 +1,8 @@
 \ automated test for ForthAstroCalc.f
 
-include "..\ForthBase\FiniteFractions.f"
-include "ForthAstroCalc.f"
-include "..\simple-tester\simple-tester.fs"
+include "e:\coding\ForthBase\FiniteFractions.f"
+include "e:\coding\simple-tester\simple-tester.f"
+include "e:\coding\AstroCalc\ForthAstroCalc\ForthAstroCalc.f"
 
 CR
 Tstart
@@ -25,4 +25,6 @@ T{ -1 -3661 ~~~duration }T -1 -1 -1 -1 ==
 2017 10 12 12 0 0 ~date-time 2value MiddayMidOctober
 T{ MiddayMidOctober OneDayOneHour +duration ~~~date-time }T 2017 10 13 13 0 0 ==
 T{ MiddayMidOctober OneDayOneHour -duration ~~~date-time }T 2017 10 11 11 0 0 ==
+
+T{ 2012 04 01 23 30 0 ~date-time UTtoGST }T 12 12 53 ~ ==
 Tend
