@@ -80,6 +80,31 @@ double UTGST(double JD, int h, int m, int s)
     return(GST);
 }
 
+// Obtain the azimuth and altitude given the hour angle and declination; PA 25
+void EqAltAz(double* alt, double* az, double H, double dec, double lat)
+// H is expressed in decimal hours
+// dec, alt and az are expressed in decimal degrees
+{
+    double sin_a = 0.0, cos_A = 0.0, sin_H = 0.0, a = 0.0, A = 0.0;
+    H = RAD(H * 15.0);
+    dec = RAD(dec);
+    lat = RAD(lat);
+    sin_a = sin(dec) * sin(lat) + cos(dec) * cos(lat) * cos(H);
+    a = asin(sin_a);
+    cos_A = (sin(dec) - sin(lat) * sin_a) / (cos(lat) * cos(a));
+    A = acos(cos_A);
+    sin_H = sin(H);
+    if (sin_H < 0.0)
+    {
+        *az = DEG(A);
+    }
+    else
+    {
+        *az = 360.0 - DEG(A);
+    }
+    *alt = DEG(a);
+}
+
 // Return a version number
 int version()
 {
@@ -108,12 +133,13 @@ int days_since_epoch(int yyyymmdd)
 
 // Convert the number of days since the EPOCH to a calendar date at Greenwich
 int date_after_epoch(int days)
+// the date is returned in YYMMDD format
 {
     int A = 0, GM = 0, GY = 0, r = 0;
     double GD = 0.0, JD = 0.0;
     JD = days + EPOCH;
     JDCD(&GD, &GM, &GY, JD);
-    r = ((int)trunc(GD)) + (60 * (GM + 60 * GY));
+    r = (int)(trunc(GD)) + 60 * (GM + 60 * GY);
     return (r);
 }
 
@@ -131,6 +157,17 @@ int UTtoGST(int D, int T)
     m = A % 60;
     h = A / 60;
     GST = UTGST(JD, h, m, s);
-    r = (int)trunc(GST * 3600.0 + 0.5);
+    r = SEC(GST);
     return(r);
+}
+
+// Convert equatorial to horizon coordinates
+void EQtoHZ(int* alt, int* az, int H, int dec, int lat)
+// alt, az, dec and lat are expressed in DEGMMSS format
+// H is expressed in integer seconds
+{
+    double alt_ = 0.0, az_ = 0.0;
+//    EqAltAz(&alt_, &az_, H, dec, lat);
+//    *alt = SEC(alt_);
+//    *az = SEC(az_);
 }
