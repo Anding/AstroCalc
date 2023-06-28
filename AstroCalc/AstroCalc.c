@@ -26,7 +26,7 @@ double CDJD(double GD, int GM, int GY)
 }
 
 // Convert a Julian Date at Greenwich to a calendar date; PA 5
-void JDCD(double* GD, int* GM, int* GY, double JD)
+void JDCD(double JD, double* GD, int* GM, int* GY)
 // The date must be in the Gregorian calendar (after 1582-10-15)
 {
     double A = 0.0, B = 0.0, C = 0.0, D = 0.0, E = 0.0, F = 0.0, G = 0.0, I = 0.0, d = 0.0, m = 0.0, y = 0.0;
@@ -81,7 +81,7 @@ double UTGST(double JD, int h, int m, int s)
 }
 
 // Obtain the azimuth and altitude given the hour angle and declination; PA 25
-void EqAltAz(double* alt, double* az, double H, double dec, double lat)
+void EqAltAz(double H, double dec, double lat, double* alt, double* az)
 // H is expressed in decimal hours
 // dec, alt and az are expressed in decimal degrees
 {
@@ -105,13 +105,70 @@ void EqAltAz(double* alt, double* az, double H, double dec, double lat)
     *alt = DEG(a);
 }
 
+// Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
+int triple_to_ff(int x1, int x2, int x3)
+// x1 is the most significant of the triple, eg YY, MM, DD ;  HH, MM, SS ;  DEG, MM, SS
+{
+    int x;
+    x = x3 + 60 * (x2 + 60 * x1);
+    return x;
+}
+
+// Convert the triple of integers x1, x2, x3 to a single decimal number
+double triple_to_decimal(int x1, int x2, int x3)
+{
+    double d = 0.0;
+    d = ((x3 / 60.0) + x2) / 60.0 + x1;
+    return d;
+}
+
+// Convert a finite fraction in single integer format to the triple of integers x1 x2 x3
+void ff_to_triple(int x, int *x1, int *x2, int *x3)
+{
+    int a = 0;
+    *x3 = x % 60;
+    a = x / 60;
+    *x2 = a % 60;
+    *x1 = a / 60;
+}
+
+// Convert a finite fraction in single integer format to a decimal number
+double ff_to_decimal(int x)
+{
+    int x1 = 0, x2 = 0, x3 = 0;
+    double d = 0.0;
+    ff_to_triple(x, &x1, &x2, &x3);
+    d = triple_to_decimal(x1, x2, x3);
+    return d;
+}
+
+// Convert a decimal number to a finite fraction in single integer format
+int decimal_to_ff(double d)
+{
+    int x1 = 0, x2 = 0, x3 = 0, x = 0;
+    decimal_to_triple(d, &x1, &x2, &x3);
+    x = triple_to_ff(x1, x2, x3);
+    return x;
+}
+
+// Convert a decimal number to the triple of integers x1 x2 x3
+void decimal_to_triple(double d, int *x1, int *x2, int *x3)
+{
+    double a = 0.0;
+    *x1 = (int)trunc(d);
+    a = 60.0 * (d - *x1);
+    *x2 = (int)trunc(a);
+    a = 60.0 * (a - *x2);
+    *x3 = (int)trunc(a);
+}
+
 // Return a version number
 int version()
 {
     int main_version = 0;
     int minor_version = 1;
     int release = 1;
-    int version_number = release + 60 * (minor_version + 60 * main_version);
+    int version_number = triple_to_ff(release, minor_version, main_version);
 
     return version_number;
 
@@ -122,10 +179,7 @@ int days_since_epoch(int yyyymmdd)
 {
     int A = 0, GD = 0, GM = 0, GY = 0, JD1 = 0;
     double JD = 0.0;
-    GD = yyyymmdd % 60;
-    A = yyyymmdd / 60;
-    GM = A % 60;
-    GY = A / 60;
+    ff_to_triple(yyyymmdd, &GY, &GM, &GD);
     JD = CDJD(GD, GM, GY);
     JD1 = (int) trunc(JD - EPOCH);
     return(JD1);
@@ -135,11 +189,12 @@ int days_since_epoch(int yyyymmdd)
 int date_after_epoch(int days)
 // the date is returned in YYMMDD format
 {
-    int A = 0, GM = 0, GY = 0, r = 0;
+    int A = 0, D =0, GM = 0, GY = 0, r = 0;
     double GD = 0.0, JD = 0.0;
     JD = days + EPOCH;
-    JDCD(&GD, &GM, &GY, JD);
-    r = (int)(trunc(GD)) + 60 * (GM + 60 * GY);
+    JDCD(JD, &GD, &GM, &GY);
+    D = (int)trunc(GD);
+    r = triple_to_ff(GY, GM, D);
     return (r);
 }
 
@@ -162,12 +217,19 @@ int UTtoGST(int D, int T)
 }
 
 // Convert equatorial to horizon coordinates
-void EQtoHZ(int* alt, int* az, int H, int dec, int lat)
+void EQtoHZ(int H, int dec, int lat, int *alt, int *az)
 // alt, az, dec and lat are expressed in DEGMMSS format
 // H is expressed in integer seconds
 {
-    double alt_ = 0.0, az_ = 0.0;
-//    EqAltAz(&alt_, &az_, H, dec, lat);
-//    *alt = SEC(alt_);
-//    *az = SEC(az_);
+    double alt_dml = 0.0, az_dml = 0.0;
+    double H_dml = 0.0, dec_dml = 0.0, lat_dml = 0.0;  // decimal quantities
+
+    H_dml = ff_to_decimal(H);
+    dec_dml = ff_to_decimal(dec);
+    lat_dml = ff_to_decimal(lat);
+
+    EqAltAz(H_dml, dec_dml, lat_dml, &alt_dml, &az_dml);
+
+    *alt = decimal_to_ff(alt_dml);
+    *az = decimal_to_ff(az_dml);
 }

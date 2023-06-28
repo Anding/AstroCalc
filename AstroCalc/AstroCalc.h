@@ -19,13 +19,31 @@
 double CDJD(double GD, int GM, int GY);
 
 // Convert a Julian Date at Greenwich to a calendar date; PA 5
-void JDCD(double* GD, int* GM, int* GY, double JD);
+void JDCD(double JD, double* GD, int* GM, int* GY);
 
 // Obtain GST given the Julian date at 0h and UT; PA 12
 double UTGST(double JD, int h, int m, int s);
 
 // Obtain the azimuth and altitude given the hour angle and declination; PA 25
-void EqAltAz(double* alt, double* az, double H, double dec, double lat);
+void EqAltAz(double H, double dec, double lat, double* alt, double* az);
+
+// Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
+int triple_to_ff(int x1, int x2, int x3);
+
+// Convert the triple of integers x1, x2, x3 to a single decimal number
+double triple_to_decimal(int x1, int x2, int x3);
+
+// Convert a finite fraction in single integer format to the triple of integers x1 x2 x3
+void ff_to_triple(int x, int* x1, int* x2, int* x3);
+
+// Convert a finite fraction in single integer format to a decimal number
+double ff_to_decimal(int x);
+
+// Convert a decimal number to a finite fraction in single integer format
+int decimal_to_ff(double d);
+
+// Convert a decimal number to the triple of integers x1 x2 x3
+void decimal_to_triple(double d, int* x1, int* x2, int* x3);
 
 // Return a version number
 ASTROCALC_API int version();
@@ -40,4 +58,4 @@ ASTROCALC_API int date_after_epoch(int days);
 ASTROCALC_API int UTtoGST(int D, int T);
 
 // Convert equatorial to horizon coordinates
-ASTROCALC_API void EQtoHZ(int* alt, int* az, int H, int dec, int lat);
+ASTROCALC_API void EQtoHZ(int H, int dec, int lat, int* alt, int* az);

@@ -14,14 +14,14 @@ int main()
 
     double day = 0.0;
     int month = 0, year = 0;
-    JDCD(&day, &month, &year, 2455002.25);
+    JDCD(2455002.25 , &day, &month, &year);
     printf("JD 2,455,002.25 is calendar date %d_%d_%f\n", year, month, day);
 
     double GST = UTGST(2444351.5, 14, 36, 52);
     printf("GST at JD 24443511.5 14:36:52 is %f\n", GST);
 
     double az = 0.0, alt = 0.0;
-    EqAltAz(&alt, &az, 5.862222, 23.219444, 52.0);
+    EqAltAz(5.862222, 23.219444, 52.0, &alt, &az);
     printf("Alt = %f, Az = %f, if H = 5.862222, Dec = 23.219444, Lat = 52.0\n", az, alt);
 
 }
