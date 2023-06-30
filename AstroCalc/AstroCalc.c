@@ -217,7 +217,7 @@ int UTtoGST(int D, int T)
 }
 
 // Convert equatorial to horizon coordinates
-void EQtoHZ(int H, int dec, int lat, int *alt, int *az)
+void EQtoHZ_ext(int H, int dec, int lat, int *alt, int *az)
 // alt, az, dec and lat are expressed in DEGMMSS format
 // H is expressed in integer seconds
 {

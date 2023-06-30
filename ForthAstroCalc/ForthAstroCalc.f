@@ -23,26 +23,38 @@ Extern: int "C" UTtoGST (int D, int UT) ;
 \ D is the date expressed as number of days since the epoch
 \ T is Ut expressed as seconds-of-the day
 
+\ Convert equatorial to horizon coordinates
+Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
+
+
 \ Canonical date and time representations ***************************************************************
 
-\ convert hours, minutes and seconds to a single cell time value
+24 0 0 ~ constant 24HOURS
+
+\ convert hours, minutes and seconds to a single cell time finite fraction
 : ~time ( hh mm ss -- T)
 \ T = ss + ( 60 * (mm + 60 * hh)), the total number of seconds
 	~
 ;
 
-\ convert a single cell time value to hours minutes and seconds
+\ convert degrees, arcminutes, arcseconds to a single cell finite fraction
+: ~angle ( deg mm ss -- D)
+\ D = ss + ( 60 * (mm + 60 * deg)), the total number of arcseconds	
+	~
+;
+
+\ convert a single cell time finite fraction to hours minutes and seconds
 : ~~~time ( T -- hh mm ss)
 	~~~
 ;
 
-\ convert year, month, day to a single cell date value
+\ convert year, month, day to a single cell date finite fraction
 : ~date ( yyyy mm dd -- D)
 \ D is the number of days since the Epoch of that date
 	~ days_since_epoch
 ;
 
-\ convert a single cell date value to year, month, day
+\ convert a single cell date fijnite fraction to year, month, day
 : ~~~date ( D -- yyyy mm dd)
 	date_after_epoch ~~~
 ;
@@ -57,8 +69,6 @@ Extern: int "C" UTtoGST (int D, int UT) ;
 : ~~~date-time
 	>R ~~~date R> ~~~time
 ;
-
-24 0 0 ~time constant 24HOURS
 
 \ convert a duration of days, hours, minutes and seconds to a two cell representation
 : ~duration ( days hh mm ss -- D T)
@@ -77,6 +87,17 @@ Extern: int "C" UTtoGST (int D, int UT) ;
 
 \ Date and time arithmetic *****************************************************************************	
 
+\ add two time values and retain the result within the 24 hour clock
+: +clock ( T1 T2 -- T)
+	+ 24HOURS +
+	24HOURS /mod drop
+;
+
+\ subtract a time value and retain the result within the 24 hour clock
+: -clock ( T1 T2 -- T)
+	negate +clock
+;
+
 \ add a duration to a date-time 
 : +duration ( D1 T1 D2 T2 -- D3 T3)
 \ D3 T3 = (D1 T1) + (D2 T2)
@@ -93,20 +114,52 @@ Extern: int "C" UTtoGST (int D, int UT) ;
 	+duration
 ;
 
+
 \ Date and time conversion *****************************************************************************
 
-0 0 0 ~time value TimeZone
-0 0 0 ~time value DaylightSaving
+0 0 0 ~time value TimeZone					\ hh min sec, west is negative IN ALL THREE INTEGERS
+0 0 0 ~time value DaylightSaving			\ hh min sec, expect 00 00 00 or 01 00 00
+48 51 53 ~angle value Latitude			\ deg min sec, south is negative IN ALL THREE INTEGERS
+02 20 56 ~angle value Longitude			\ deg min sec, west is negative IN ALL THREE INTEGERS
 
-\ convert a local civil time to UT, using the two-cell representation
-: LT-to-UT ( D T -- D T)
+
+\ convert a finite fraction in deg min sec to hours min sec
+: AngleToTime ( x -- y)
+	15 /
+;
+
+\ convert a finite fraction in hours min sec to deg min sec
+: TimeToAngle ( x -- y)
+	15 *
+;
+
+\ convert a local civil date and time to UT, using the two-cell representation
+: LTtoUT ( D T -- D T)
 	DaylightSaving 0 swap -duration
 	TimeZone 0 swap -duration
 ;
 
-\ convert UT to a local civil time, using two-cell representation
-: UT-to-LT ( D T -- D T)
+\ convert UT to a local civil date and time, using two-cell representation
+: UTtoLT ( D T -- D T)
 	TimeZone 0 swap +duration
 	DaylightSaving 0 swap +duration
+;
+
+\ convert GST to LST
+: GSTtoLST ( T -- T)
+	longitude AngleToTime -clock
+;
+
+\ convert LST to GST
+: LSTtoGST ( T -- T)
+	longitude AngleToTime +clock
+;
+
+
+\ Coorodinate conversion ********************************************************************************
+
+: EQtoHZ ( H dec -- alt az) { | alt az -- }
+	latitude ADDR alt ADDR az				\ use VFX locals for the pass-by-reference
+	( H dec lat &alt &az) EQtoHZ_ext ( --) alt az
 ;
 

@@ -58,4 +58,4 @@ ASTROCALC_API int date_after_epoch(int days);
 ASTROCALC_API int UTtoGST(int D, int T);
 
 // Convert equatorial to horizon coordinates
-ASTROCALC_API void EQtoHZ(int H, int dec, int lat, int* alt, int* az);
+ASTROCALC_API void EQtoHZ_ext(int H, int dec, int lat, int* alt, int* az);
