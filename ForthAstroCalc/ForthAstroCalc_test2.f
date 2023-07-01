@@ -24,6 +24,8 @@ T{ -1 -3661 ~~~duration }T -1 -1 -1 -1 ==
 
 
 CR ." Date and time arithmetic" CR
+T{ 36 00 00 ~time %clock }T 1 12 00 00 ~time ==
+T{ -26 00 00 ~time %clock }T -2 22 00 00 ~time ==
 T{ 23 30 45 ~time 00 45 00 ~time +clock }T 00 15 45 ~time ==
 T{ 00 15 45 ~time 00 45 00 ~time -clock }T 23 30 45 ~time ==
 
@@ -47,9 +49,9 @@ T{ 1 00 30 45 ~time LTtoUT }T 0 23 30 45 ~time ==
 T{ 0 10 00 00 ~time UTtoLT }T 0 18 00 00 ~time ==
 T{ 0 18 00 00 ~time LTtoUT }T 0 10 00 00 ~time ==
 
-64 00 00 ~degrees -> Longitude
-T{ 04 40 05 ~time GSTtoLST }T 00 24 05
-T{ 00 24 05 ~time LSTtoGST }T 04 40 05
+64 00 00 ~angle -> Longitude
+T{ 04 40 05 ~time GSTtoLST }T 00 24 05 ~time ==
+T{ 00 24 05 ~time LSTtoGST }T 04 40 05 ~time ==
 
 T{ 2012 04 01 23 30 0 ~date-time UTtoGST }T 12 12 53 ~ ==
 Tend

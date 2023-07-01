@@ -31,22 +31,19 @@ Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 
 24 0 0 ~ constant 24HOURS
 
-\ convert hours, minutes and seconds to a single cell time finite fraction
-: ~time ( hh mm ss -- T)
+\ convert a time in hours, minutes and seconds to a single cell time finite fraction
+: ~time ( hh mm ss -- T) ~ ;
 \ T = ss + ( 60 * (mm + 60 * hh)), the total number of seconds
-	~
-;
 
-\ convert degrees, arcminutes, arcseconds to a single cell finite fraction
-: ~angle ( deg mm ss -- D)
+\ convert an angle in degrees, arcminutes, arcseconds to a single cell finite fraction
+: ~angle ( deg mm ss -- D) ~ ;
 \ D = ss + ( 60 * (mm + 60 * deg)), the total number of arcseconds	
-	~
-;
 
+\ convert an hour angle in hours, minutes and seconds to a single cell time finite fraction
+: ~hourangle ( hh mm ss -- T) ~ ;
+	
 \ convert a single cell time finite fraction to hours minutes and seconds
-: ~~~time ( T -- hh mm ss)
-	~~~
-;
+: ~~~time ( T -- hh mm ss) ~~~ ;
 
 \ convert year, month, day to a single cell date finite fraction
 : ~date ( yyyy mm dd -- D)
@@ -54,7 +51,7 @@ Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 	~ days_since_epoch
 ;
 
-\ convert a single cell date fijnite fraction to year, month, day
+\ convert a single cell date finite fraction to year, month, day
 : ~~~date ( D -- yyyy mm dd)
 	date_after_epoch ~~~
 ;
@@ -80,17 +77,23 @@ Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 ;
 
 \ convert a two cell duration representation to days, hours, minutes, and seconds
-: ~~~duration ( D T -- days hh mm ss)
-	~~~time
-;
+: ~~~duration ( D T -- days hh mm ss) ~~~time ;
 
 
 \ Date and time arithmetic *****************************************************************************	
 
+\ adjust a time to within 0 - 24h plus an increment number of days
+: %clock ( T - D T)
+	24HOURS /mod swap
+	dup 0< if
+		24HOURS +
+		swap 1- swap
+	then
+;
+	
 \ add two time values and retain the result within the 24 hour clock
 : +clock ( T1 T2 -- T)
-	+ 24HOURS +
-	24HOURS /mod drop
+	+ %clock nip
 ;
 
 \ subtract a time value and retain the result within the 24 hour clock
@@ -102,8 +105,7 @@ Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 : +duration ( D1 T1 D2 T2 -- D3 T3)
 \ D3 T3 = (D1 T1) + (D2 T2)
 	rot swap				( D1 D2 T1 T2)
-	+ 24HOURS /mod		( D1 D2 T3 +D)
-	swap >R				( D1 D2 +D R:T3)
+	+ %clock >R			( D1 D2 +D R:T3)
 	+ + R>				( D3 T3)
 ;
 
