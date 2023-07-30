@@ -1,8 +1,8 @@
 \ automated test for ForthAstroCalc.f
 
-include "e:\coding\ForthBase\FiniteFractions.f"
-include "e:\coding\simple-tester\simple-tester.f"
-include "e:\coding\AstroCalc\ForthAstroCalc\ForthAstroCalc.f"
+include "%idir%\..\..\ForthBase\FiniteFractions.f"
+include "%idir%\..\..\simple-tester\simple-tester.f"
+include "%idir%\ForthAstroCalc.f"
 
 
 CR ." Canonical date and time representations" CR
@@ -54,4 +54,15 @@ T{ 04 40 05 ~time GSTtoLST }T 00 24 05 ~time ==
 T{ 00 24 05 ~time LSTtoGST }T 04 40 05 ~time ==
 
 T{ 2012 04 01 23 30 0 ~date-time UTtoGST }T 12 12 53 ~ ==
+
+
+CR ." Coordinate conversion" CR
+
+variable alt
+variable az
+T{ 05 51 44 ~time 23 13 10 ~angle 52 00 00 ~angle alt az EQtoHZ_ext alt @ az @ }T 19 20 04 ~angle 283 16 16 ~angle ==
+52 00 00 ~angle -> Latitude
+T{ 05 51 44 ~time 23 13 10 ~angle EQtoHZ }T 19 20 04 ~angle 283 16 16 ~angle ==
+T{ 19 20 04 ~angle 283 16 16 ~angle EQtoHZ }T 05 51 44 ~angle 23 13 10 ~angle ==
+CR 
 Tend

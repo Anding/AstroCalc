@@ -105,6 +105,32 @@ void EqAltAz(double H, double dec, double lat, double* alt, double* az)
     *alt = DEG(a);
 }
 
+
+// Obtain the hour angle and declination given the azimuth and altitude ; PA 26
+void AltAzEq(double alt, double az, double lat, double* H, double* dec)
+// H is expressed in decimal hours
+// dec, alt and az are expressed in decimal degrees
+{
+    double sin_dec = 0.0, cos_H = 0.0, sin_A = 0.0, H_r = 0.0, dec_r = 0.0;
+    alt = RAD(alt);
+    az = RAD(az);
+    lat = RAD(lat);
+    sin_dec = sin(alt) * sin(lat) + cos(alt) * cos(lat) * cos(az);
+    dec_r = asin(sin_dec);
+    cos_H = (sin(alt) - sin(lat) * sin_dec) / (cos(lat) * cos(dec_r));
+    H_r = acos(cos_H);
+    sin_A = sin(az);
+    if (sin_A < 0.0)
+    {
+        *H = DEG(H_r) / 15.0;
+    }
+    else
+    {
+        *H = (360.0 - DEG(H_r)) / 15.0;
+    }
+    *dec = DEG(dec_r);
+}
+
 // Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
 int triple_to_ff(int x1, int x2, int x3)
 // x1 is the most significant of the triple, eg YY, MM, DD ;  HH, MM, SS ;  DEG, MM, SS
@@ -159,7 +185,7 @@ void decimal_to_triple(double d, int *x1, int *x2, int *x3)
     a = 60.0 * (d - *x1);
     *x2 = (int)trunc(a);
     a = 60.0 * (a - *x2);
-    *x3 = (int)trunc(a);
+    *x3 = (int)trunc(a + 0.5);
 }
 
 // Return a version number
@@ -232,4 +258,22 @@ void EQtoHZ_ext(int H, int dec, int lat, int *alt, int *az)
 
     *alt = decimal_to_ff(alt_dml);
     *az = decimal_to_ff(az_dml);
+}
+
+// Convert horizon to equatorial coordinates
+void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec)
+// alt, az, dec and lat are expressed in DEGMMSS format
+// H is expressed in integer seconds
+{
+    double alt_dml = 0.0, az_dml = 0.0;
+    double H_dml = 0.0, dec_dml = 0.0, lat_dml = 0.0;  // decimal quantities
+
+    alt_dml = ff_to_decimal(alt);
+    az_dml = ff_to_decimal(az);
+    lat_dml = ff_to_decimal(lat);
+
+    EqAltAz(alt_dml, az_dml, lat_dml, &H_dml, &dec_dml);
+
+    *H = decimal_to_ff(H_dml);
+    *dec = decimal_to_ff(dec_dml);
 }

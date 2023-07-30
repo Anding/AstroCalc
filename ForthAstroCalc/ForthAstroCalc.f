@@ -25,7 +25,13 @@ Extern: int "C" UTtoGST (int D, int UT) ;
 
 \ Convert equatorial to horizon coordinates
 Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
+\ alt, az, dec and lat are expressed in DEGMMSS format
+\ H is expressed in integer seconds
 
+\ Convert equatorial to horizon coordinates
+Extern: void "C" HZtoEQ_ext(int alt, int az, int lat, int * H, int * dec) ;
+\ alt, az, dec and lat are expressed in DEGMMSS format
+\ H is expressed in integer seconds
 
 \ Canonical date and time representations ***************************************************************
 
@@ -163,5 +169,10 @@ Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 : EQtoHZ ( H dec -- alt az) { | alt az -- }
 	latitude ADDR alt ADDR az				\ use VFX locals for the pass-by-reference
 	( H dec lat &alt &az) EQtoHZ_ext ( --) alt az
+;
+
+: HZtoEQ ( alt az -- H dec) { | H dec -- }
+	latitude ADDR H ADDR dec				\ use VFX locals for the pass-by-reference
+	( alt az lat &H &dec) HZtoEQ_ext ( --) H dec
 ;
 

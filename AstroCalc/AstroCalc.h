@@ -27,6 +27,9 @@ double UTGST(double JD, int h, int m, int s);
 // Obtain the azimuth and altitude given the hour angle and declination; PA 25
 void EqAltAz(double H, double dec, double lat, double* alt, double* az);
 
+// Obtain the hour angle and declination given the azimuth and altitude ; PA 26
+void AltAzEq(double alt, double az, double lat, double* H, double* dec);
+
 // Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
 int triple_to_ff(int x1, int x2, int x3);
 
@@ -59,3 +62,6 @@ ASTROCALC_API int UTtoGST(int D, int T);
 
 // Convert equatorial to horizon coordinates
 ASTROCALC_API void EQtoHZ_ext(int H, int dec, int lat, int* alt, int* az);
+
+// Convert horizon to equatorial coordinates
+ASTROCALC_API void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec);

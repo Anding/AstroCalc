@@ -24,6 +24,9 @@ int main()
     EqAltAz(5.862222, 23.219444, 52.0, &alt, &az);
     printf("Alt = %f, Az = %f, if H = 5.862222, Dec = 23.219444, Lat = 52.0\n", az, alt);
 
+    double H = 0.0, dec = 0.0;
+    AltAzEq(19.334334, 283.271028, 52.0, &H, &dec);
+    printf("H = %f, Dec = %f, if Alt = 19.334334, Az = 283.271028, Lat = 52.0\n", H, dec);
 }
 
 
