@@ -272,7 +272,7 @@ void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec)
     az_dml = ff_to_decimal(az);
     lat_dml = ff_to_decimal(lat);
 
-    EqAltAz(alt_dml, az_dml, lat_dml, &H_dml, &dec_dml);
+    AltAzEq(alt_dml, az_dml, lat_dml, &H_dml, &dec_dml);
 
     *H = decimal_to_ff(H_dml);
     *dec = decimal_to_ff(dec_dml);

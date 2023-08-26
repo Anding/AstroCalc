@@ -67,7 +67,6 @@ variable az
 T{ 05 51 44 ~time 23 13 10 ~angle 52 00 00 ~angle alt az EQtoHZ_ext alt @ az @ }T 19 20 04 ~angle 283 16 16 ~angle ==
 52 00 00 ~angle -> Latitude
 T{ 05 51 44 ~time 23 13 10 ~angle EQtoHZ }T 19 20 04 ~angle 283 16 16 ~angle ==
-T{ 19 20 04 ~angle 283 16 16 ~angle HZtoEQ CR ~. CR ~. CR
-\ T{ 19 20 04 ~angle 283 16 16 ~angle HZtoEQ }T 05 51 44 ~angle 23 13 10 ~angle ==
+T{ 19 20 04 ~angle 283 16 16 ~angle HZtoEQ }T 05 51 44 ~angle 23 13 10 ~angle ==
 CR 
 Tend
