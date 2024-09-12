@@ -2,6 +2,7 @@
 // Astronomy calculations based on Duffett-Smith and Zwart, "Practical Astronomy"
 
 #include "AstroCalc.h"
+#include <time.h>
 
 // Convert a calendar date at Greenwich to a Julian Date; PA 4
 double CDJD(double GD, int GM, int GY)
