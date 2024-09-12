@@ -1,5 +1,6 @@
-include c:\work\forthbase\finitefractions.f 
-include c:\work\astrocalc\forthastrocalc\forthastrocalc.f 
+include "%idir%\..\..\ForthBase\FiniteFractions\FiniteFractions.f"
+include "%idir%\..\..\simple-tester\simple-tester.f"
+include "%idir%\ForthAstroCalc.f"
 
  CR
 ." AstroCalc.dll load address " AstroCalc.dll u. CR

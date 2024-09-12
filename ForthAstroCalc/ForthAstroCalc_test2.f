@@ -1,6 +1,6 @@
 \ automated test for ForthAstroCalc.f
 
-include "%idir%\..\..\ForthBase\FiniteFractions.f"
+include "%idir%\..\..\ForthBase\FiniteFractions\FiniteFractions.f"
 include "%idir%\..\..\simple-tester\simple-tester.f"
 include "%idir%\ForthAstroCalc.f"
 
