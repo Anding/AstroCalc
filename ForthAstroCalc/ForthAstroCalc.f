@@ -168,7 +168,6 @@ Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
 	longitude AngleToTime +clock
 ;
 
-
 \ Coorodinate conversion ********************************************************************************
 
 : EQtoHZ ( H dec -- alt az) { | alt az -- }
