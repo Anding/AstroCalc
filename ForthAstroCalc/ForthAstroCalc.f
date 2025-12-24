@@ -33,6 +33,11 @@ Extern: void "C" HZtoEQ_ext(int alt, int az, int lat, int * H, int * dec) ;
 \ alt, az, dec and lat are expressed in DEGMMSS format
 \ H is expressed in integer seconds
 
+\ Compute the angular separation between two coordinates
+Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
+\ dec is expressed in DEGMMSS format
+\ H is expressed in integer seconds
+
 \ Canonical date and time representations ***************************************************************
 
 24 0 0 ~ constant 24HOURS

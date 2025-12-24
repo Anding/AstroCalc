@@ -132,6 +132,29 @@ void AltAzEq(double alt, double az, double lat, double* H, double* dec)
     *dec = DEG(dec_r);
 }
 
+// Compute the angular separation of two coordinates
+double angular_separation(double H1, double dec1, double H2, double dec2)
+// H is expressed in decimal hours
+// dec is expressed in decimal degrees
+{
+	H1 = RAD(H1 * 15.0);
+	dec1 = RAD(dec1);
+	H2 = RAD(H2 * 15.0);
+	dec2 = RAD(dec2);	
+	double dH = H1 - H2;
+	double s1 = sin(dec1);
+	double c1 = cos(dec1);
+	double s2 = sin(dec2);
+	double c2 = cos(dec2);
+	double sdH = sin(dH);
+	double cdH = cos(dH);
+	double t1 = c2 * sdH;
+	double t2 = c1 * s2 - s1 * c2 * cdH;
+	double t3 = s1 * s2 + c1 * c2 * cdH;
+	double a = DEG(atan2(sqrt(t1 * t1 + t2 * t2), t3));
+	return a;
+}
+
 // Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
 int triple_to_ff(int x1, int x2, int x3)
 // x1 is the most significant of the triple, eg YY, MM, DD ;  HH, MM, SS ;  DEG, MM, SS
@@ -277,4 +300,24 @@ void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec)
 
     *H = decimal_to_ff(H_dml);
     *dec = decimal_to_ff(dec_dml);
+}
+
+// Compute the angular separation of two coordinates
+int ang_sep(int H1, int dec1, int H2, int dec2)
+// H is expressed in integer seconds
+// dec is expressed in DEGMMSS format
+{
+	double H1_dml = 0.0, dec1_dml = 0.0;	// decimal quantities
+	double H2_dml = 0.0, dec2_dml = 0.0;
+	double a_dml = 0.0;
+	int a = 0;
+	
+	 H1_dml = ff_to_decimal(H1);
+    dec1_dml = ff_to_decimal(dec1);	
+ 	 H2_dml = ff_to_decimal(H2);
+    dec2_dml = ff_to_decimal(dec2);	   
+    
+    a_dml = angular_separation(H1_dml, dec1_dml, H2_dml, dec2_dml);
+    a = decimal_to_ff(a_dml);
+    return(a);
 }
