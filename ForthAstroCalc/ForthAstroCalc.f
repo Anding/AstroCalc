@@ -1,5 +1,5 @@
 \ Astronomical calculations based on Duffett-Smith and Zwart, "Practical Astronomy"
-\ Requires ForthBase/FiniteFractions.f
+need FiniteFractions
 
 \ Interface with the C language library rountines *******************************************************
 
