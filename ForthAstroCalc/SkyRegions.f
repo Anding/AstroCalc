@@ -23,10 +23,8 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 	( pfa) >R
 	R@ @ 				( RA' Dec' RA)
 	R@ 1 cells+ @	( RA' Dec' RA Dec)
-	.s
 	ang_sep 			( deg)
 	R@ 2 cells+ @	( deg rad)
-	.s
 	< if
 		R> 3 cells+ count -1
 	else
@@ -39,12 +37,17 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 \ RA' Dec' is the test coordinate
 \ RA1 Dec1 is the south-west coordinate, RA2 Dec2 is the north-east coordinate
 \ of the bounding box
-	RA1 RA2 > -> f 		\ wrap around RA 00 so invert the RA tests
-	RA' RA1 >= f if 0= then
 	Dec' Dec1 >=
-	RA' RA2 < f if 0= then
-	Dec' Dec2 <
-	and and and
+	Dec' Dec2 <	
+	and
+	0= if 0 exit then
+	RA' RA1 >=
+	RA' RA2 <
+	RA1 RA2 > if 		\ wrap around RA 00 so adjust the RA tests
+		xor
+	else
+		and
+	then
 ;
 
 : sky-strip
@@ -73,7 +76,7 @@ create ( caddr u <name> --)
 	$,
 	
 DOES> ( RA Dec -- caddr u TRUE)
-	( pfa) 2drop count -1
+	( pfa) nip nip count -1
 ;
 
 \ an iterator supplied to traverse-wordlist
