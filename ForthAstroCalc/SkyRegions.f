@@ -1,8 +1,18 @@
-\ define regions of the sky
+\ a system to define custom regions of the sky
+
+\ Each region may be:
+\ 	a sky circle within a given radius of a coordinate
+\ 	a sky strip within a box bounded by south-west and north-east coordinates
+\ regions are created as Forth words with the stack effect ( RA Dec -- caddr u TRUE | FALSE) that test if a given coordinate is within the region
+
+\ Region definitions may be organized into a list
+\ lists are created as Forth words with the stack effect ( RA Dec -- caddr y ) that return the first region containing the given coordinate
+\ lists are assembled in reverse search order ( the first region added is the last region tested)
+\ rule: each list must match every coordinate  - a default region that matches all coordinates is provided
 
 need AstroCalc
 
-: sky-region-circle
+: sky-circle
 \ create a sky region that is a circle around a point
 \ RA and Dec are finite fractions in single integer format
 create  ( caddr u RA Dec rad <name> --) 
@@ -27,7 +37,7 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 : box-test { RA' Dec' RA1 Dec1 RA2 Dec2 | f -- flag }
 \ test whether a coordinate lies within a bounding box
 \ RA' Dec' is the test coordinate
-\ RA1 Dec1 is the south west coordinate, RA2 Dec2 is the north east coordinate
+\ RA1 Dec1 is the south-west coordinate, RA2 Dec2 is the north-east coordinate
 \ of the bounding box
 	RA1 RA2 > -> f 		\ wrap around RA 00 so invert the RA tests
 	RA' RA1 >= f if 0= then
@@ -37,10 +47,9 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 	and and and
 ;
 
-: sky-region-strip
+: sky-strip
 \ create a sky region that is a strip
-\ RA1 and Dec1 is the lower corner, RA2 and Dec2 is the upper corner of the inside of the strip
-\ the strip must not cover RA = 0 
+\ RA1 and Dec1 is the south-west co0rodinate, RA2 and Dec2 is the north-east coordinate
 create  ( caddr u RA1 Dec1 RA2 Dec2 <name> --) 
 	>R >R >R , R> , R> , R> , $, ( pfa: RA1 Dec1 RA2 Dec2 u c1 c2 ... cn)
 
@@ -58,41 +67,40 @@ DOES> ( RA Dec -- caddr u TRUE | FALSE)
 	then
 ;   
 
-: default-region
-\ create a default sky region in case no other is found
+: sky-default
+\ create a sky region that matches any coordinate
 create ( caddr u <name> --)
 	$,
-DOES>
-	( pfa) count -1
+	
+DOES> ( RA Dec -- caddr u TRUE)
+	( pfa) 2drop count -1
 ;
 
+\ an iterator supplied to traverse-wordlist
 : iterate-regions ( RA Dec nfa -- flag RA Dec)	\ nfa = name field address in the VFX dictionary header
 	name>interpret ( RA Dec xt)
 	>R 2dup R>		( RA Dec RA Dec xt)
 	execute 			( RA Dec FALSE | RA Dec c-addr u TRUE)
 	?dup 0=			( RA Dec TRUE  | RA Dec c-addr u TRUE FALSE)	
-	\ top flag tells traverse-wordlist whether to continue
+	\ top flag tells traverse-wordlist whether or not to continue
 ;
 
-: BEGIN-REGION-SET
-	get-current wordlist 	
+\ organize region definitions into a named list
+: BEGIN-REGIONSET ( <name>)
+	get-current wordlist ( current-wid wid) 	
 	create ( wid <name> -- current-wid )
 		dup , dup set-current +order
-	DOES>
+		
+	DOES> ( RA Dec -- c-addr u)
+	\ find the first region in the list matching the given coordinate
 		( pfa) @ ( wid) ['] iterate-regions swap traverse-wordlist
-		( RA Dec c-addr u TRUE )							\ the background region will always be found if no other
+		( RA Dec c-addr u TRUE )							\ rule: every list must match every coordinate; use default region if necessary
 		drop rot drop rot drop ( c-addr u)
 ;
 
-: END-REGION-SET ( wid)
+\ end the list of region definitions
+: END-REGIONSET ( wid)
 	set-current
 ;
 
-BEGIN-REGION-SET SAMPLE
 
-s" no region" default-region
-s" M42 Orion Nebula" 05 35 17 RA -05 23 15 Dec 05 00 00 DEGMMSS sky-region-circle M42?
-s" Pisces" 00 00 00 RA 00 00 00 Dec 02 00 00 RA 20 00 00 Dec sky-region-strip Pisces?
-s" Square of Pegasus" 23 00 00 RA 15 00 00 Dec 00 30 00 RA 30 00 00 Dec sky-region-strip Pegasus?
-
-END-REGION-SET
