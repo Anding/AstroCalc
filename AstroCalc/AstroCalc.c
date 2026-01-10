@@ -321,3 +321,54 @@ int ang_sep(int H1, int dec1, int H2, int dec2)
     a = decimal_to_ff(a_dml);
     return(a);
 }
+
+// Convert J2000 <> JNOW
+void J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int* RA_JNOW, int* DEC_JNOW)
+// RA is expressed in integer seconds
+// Dec is expressed in DEGMMSS format
+// YYYYMMDD expresses the date
+{
+
+    int GD = 0, GM = 0, GY = 0;
+    double ra_jnow = 0.0, dec_jnow = 0.0;
+
+    ff_to_triple(yyyymmdd, &GY, &GM, &GD);
+
+    double jd = CDJD(GD, GM, GY);
+    double ra_j2000 = RAD(ff_to_decimal(RA_J2000) * 15.0);
+    double dec_j2000 = RAD(ff_to_decimal(DEC_J2000));
+    // void J2000_to_JNOW(double ra_j2000, double dec_j2000, double jd_tt, double pr, double pd, double px, double rv, double* ra_jnow, double* dec_jnow);
+    J2000_to_JNOW(ra_j2000, dec_j2000, jd, 0, 0, 0, 0, &ra_jnow, &dec_jnow);
+
+    // Convert RA from radians to hours, ensuring range [0, 24)
+    *RA_JNOW = decimal_to_ff(DEG(ra_jnow) / 15.0);
+    if (*RA_JNOW >= 86400) *RA_JNOW = *RA_JNOW - 86400;
+
+    *DEC_JNOW = decimal_to_ff(DEG(dec_jnow));
+}
+;
+
+void JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int* RA_J2000, int* DEC_J2000)
+// RA is expressed in integer seconds
+// Dec is expressed in DEGMMSS format
+// YYYYMMDD expresses the date
+{
+
+    int GD = 0, GM = 0, GY = 0;
+    double ra_j2000 = 0.0, dec_j2000 = 0.0;
+
+    ff_to_triple(yyyymmdd, &GY, &GM, &GD);
+
+    double jd = CDJD(GD, GM, GY);
+    double ra_jnow = RAD(ff_to_decimal(RA_JNOW) * 15.0);
+    double dec_jnow = RAD(ff_to_decimal(DEC_JNOW));
+    // void JNOW_to_J2000(double ra_jnow, double dec_jnow, double jd_tt, double* ra_j2000, double* dec_j2000);
+    JNOW_to_J2000(ra_jnow, dec_jnow, jd, &ra_j2000, &dec_j2000);
+
+    // Convert RA from radians to hours, ensuring range [0, 24)
+    *RA_J2000 = decimal_to_ff(DEG(ra_j2000) / 15.0);
+    if (*RA_J2000 >= 86400) *RA_J2000 = *RA_J2000 - 86400;
+
+    *DEC_J2000 = decimal_to_ff(DEG(dec_j2000));
+}
+;

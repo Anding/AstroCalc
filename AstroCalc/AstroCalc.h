@@ -33,6 +33,16 @@ void AltAzEq(double alt, double az, double lat, double* H, double* dec);
 // Compute the angular separation of two coordinates
 double angular_separation(double H1, double dec1, double H2, double dec2);
 
+// ERFA-based coordinate conversions (AstroCalcERFA.c)
+// Convert J2000.0 (ICRS) coordinates to JNOW (CIRS) coordinates
+void J2000_to_JNOW(double ra_j2000, double dec_j2000, double jd_tt,
+                   double pr, double pd, double px, double rv,
+                   double* ra_jnow, double* dec_jnow);
+
+// Convert JNOW (CIRS) coordinates to J2000.0 (ICRS) coordinates
+void JNOW_to_J2000(double ra_jnow, double dec_jnow, double jd_tt,
+                   double* ra_j2000, double* dec_j2000);
+
 // Convert the triple of integers x1 x2 x3 to a finite fraction in single integer format
 int triple_to_ff(int x1, int x2, int x3);
 
@@ -72,12 +82,8 @@ ASTROCALC_API void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec);
 // Compute the angular separation of two coordinates
 ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
 
-// ERFA-based coordinate conversions (AstroCalcERFA.c)
-// Convert J2000.0 (ICRS) coordinates to JNOW (CIRS) coordinates
-void J2000_to_JNOW(double ra_j2000, double dec_j2000, double jd_tt,
-                   double pr, double pd, double px, double rv,
-                   double* ra_jnow, double* dec_jnow);
+// J2000 to JNOW
+ASTROCALC_API void J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int* RA_JNOW, int* DEC_JNOW);
 
-// Convert JNOW (CIRS) coordinates to J2000.0 (ICRS) coordinates
-void JNOW_to_J2000(double ra_jnow, double dec_jnow, double jd_tt,
-                   double* ra_j2000, double* dec_j2000);
+// JNOW to J2000
+ASTROCALC_API void JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int* RA_J2000, int* DEC_J2000);

@@ -49,6 +49,9 @@ void J2000_to_JNOW(double ra_j2000, double dec_j2000, double jd_tt,
     // Call ERFA function to transform ICRS (J2000.0) to CIRS (JNOW)
     eraAtci13(ra_j2000, dec_j2000, pr, pd, px, rv, 
               date1, date2, ra_jnow, dec_jnow, &eo);
+    
+    // Normalize RA to range [0, 2?)
+    *ra_jnow = eraAnp(*ra_jnow);
 }
 
 /*
@@ -90,4 +93,7 @@ void JNOW_to_J2000(double ra_jnow, double dec_jnow, double jd_tt,
     
     // Call ERFA function to transform CIRS (JNOW) to ICRS (J2000.0)
     eraAtic13(ra_jnow, dec_jnow, date1, date2, ra_j2000, dec_j2000, &eo);
+    
+    // Normalize RA to range [0, 2?)
+    *ra_j2000 = eraAnp(*ra_j2000);
 }

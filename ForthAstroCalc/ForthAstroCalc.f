@@ -38,6 +38,15 @@ Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
 \ dec is expressed in DEGMMSS format
 \ H is expressed in integer seconds
 
+\ Convert J2000 to JNOW
+Extern: void "C" J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int * RA_JNOW, int * DEC_JNOW);
+\ RA is expressed in integer seconds
+\ Dec is expressed in DEGMMSS formt
+\ yymmdd is the expression of the date e.g. 2010 08 01 ~ ( 723481)
+
+\ Convert JNOW to J2000
+Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J2000, int * DEC_J2000);
+
 \ Canonical date and time representations ***************************************************************
 
 24 0 0 ~ constant 24HOURS
@@ -178,5 +187,15 @@ Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
 : HZtoEQ ( alt az -- H dec) { | H dec -- }
 	latitude ADDR H ADDR dec				\ use VFX locals for the pass-by-reference
 	( alt az lat &H &dec) HZtoEQ_ext ( --) H dec
+;
+
+: J2000 ( RA_JNOW DEC_JNOW YYMMDD -- RA_J2000 DEC_J2000) { | RA_J2000 DEC_J2000 -- }
+    ADDR RA_J2000 ADDR DEC_J2000
+    JNOWtoJ2000 ( --) RA_J2000 DEC_J2000
+;  
+
+: JNOW ( RA_J2000 DEC_J2000 YYMMDD -- RA_JNOW DEC_JNOW) { | RA_JNOW DEC_JNOW -- }
+    ADDR RA_JNOW ADDR DEC_JNOW
+    J2000toJNOW ( --) RA_JNOW DEC_JNOW
 ;
 
