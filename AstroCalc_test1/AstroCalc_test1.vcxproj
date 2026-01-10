@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,7 +20,257 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\AstroCalc\AstroCalc.c" />
-    <ClCompile Include="AstroCalc_test1.c" />
+    <ClCompile Include="AstroCalc_test1.c" Condition="'$(Configuration)'=='DisabledByERFATest'" />
+    <ClCompile Include="..\AstroCalc\AstroCalcERFA.c" />
+    <ClCompile Include="AstroCalcERFA_Tests.c" />
+    <ClCompile Include="$(ERFASourceDir)\a2af.c" />
+    <ClCompile Include="$(ERFASourceDir)\a2tf.c" />
+    <ClCompile Include="$(ERFASourceDir)\ab.c" />
+    <ClCompile Include="$(ERFASourceDir)\ae2hd.c" />
+    <ClCompile Include="$(ERFASourceDir)\af2a.c" />
+    <ClCompile Include="$(ERFASourceDir)\anp.c" />
+    <ClCompile Include="$(ERFASourceDir)\anpm.c" />
+    <ClCompile Include="$(ERFASourceDir)\apcg.c" />
+    <ClCompile Include="$(ERFASourceDir)\apcg13.c" />
+    <ClCompile Include="$(ERFASourceDir)\apci.c" />
+    <ClCompile Include="$(ERFASourceDir)\apci13.c" />
+    <ClCompile Include="$(ERFASourceDir)\apco.c" />
+    <ClCompile Include="$(ERFASourceDir)\apco13.c" />
+    <ClCompile Include="$(ERFASourceDir)\apcs.c" />
+    <ClCompile Include="$(ERFASourceDir)\apcs13.c" />
+    <ClCompile Include="$(ERFASourceDir)\aper.c" />
+    <ClCompile Include="$(ERFASourceDir)\aper13.c" />
+    <ClCompile Include="$(ERFASourceDir)\apio.c" />
+    <ClCompile Include="$(ERFASourceDir)\apio13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atcc13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atccq.c" />
+    <ClCompile Include="$(ERFASourceDir)\atci13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atciq.c" />
+    <ClCompile Include="$(ERFASourceDir)\atciqn.c" />
+    <ClCompile Include="$(ERFASourceDir)\atciqz.c" />
+    <ClCompile Include="$(ERFASourceDir)\atco13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atic13.c" />
+    <ClCompile Include="$(ERFASourceDir)\aticq.c" />
+    <ClCompile Include="$(ERFASourceDir)\aticqn.c" />
+    <ClCompile Include="$(ERFASourceDir)\atio13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atioq.c" />
+    <ClCompile Include="$(ERFASourceDir)\atoc13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atoi13.c" />
+    <ClCompile Include="$(ERFASourceDir)\atoiq.c" />
+    <ClCompile Include="$(ERFASourceDir)\bi00.c" />
+    <ClCompile Include="$(ERFASourceDir)\bp00.c" />
+    <ClCompile Include="$(ERFASourceDir)\bp06.c" />
+    <ClCompile Include="$(ERFASourceDir)\bpn2xy.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2i00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2i00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2i06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2ibpn.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2ixy.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2ixys.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2s.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2t00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2t00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2t06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2tcio.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2teqx.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2tpe.c" />
+    <ClCompile Include="$(ERFASourceDir)\c2txy.c" />
+    <ClCompile Include="$(ERFASourceDir)\cal2jd.c" />
+    <ClCompile Include="$(ERFASourceDir)\cp.c" />
+    <ClCompile Include="$(ERFASourceDir)\cpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\cr.c" />
+    <ClCompile Include="$(ERFASourceDir)\d2dtf.c" />
+    <ClCompile Include="$(ERFASourceDir)\d2tf.c" />
+    <ClCompile Include="$(ERFASourceDir)\dat.c" />
+    <ClCompile Include="$(ERFASourceDir)\dtdb.c" />
+    <ClCompile Include="$(ERFASourceDir)\dtf2d.c" />
+    <ClCompile Include="$(ERFASourceDir)\eceq06.c" />
+    <ClCompile Include="$(ERFASourceDir)\ecm06.c" />
+    <ClCompile Include="$(ERFASourceDir)\ee00.c" />
+    <ClCompile Include="$(ERFASourceDir)\ee00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\ee00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\ee06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\eect00.c" />
+    <ClCompile Include="$(ERFASourceDir)\eform.c" />
+    <ClCompile Include="$(ERFASourceDir)\eo06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\eors.c" />
+    <ClCompile Include="$(ERFASourceDir)\epb.c" />
+    <ClCompile Include="$(ERFASourceDir)\epb2jd.c" />
+    <ClCompile Include="$(ERFASourceDir)\epj.c" />
+    <ClCompile Include="$(ERFASourceDir)\epj2jd.c" />
+    <ClCompile Include="$(ERFASourceDir)\epv00.c" />
+    <ClCompile Include="$(ERFASourceDir)\eqec06.c" />
+    <ClCompile Include="$(ERFASourceDir)\eqeq94.c" />
+    <ClCompile Include="$(ERFASourceDir)\era00.c" />
+    <ClCompile Include="$(ERFASourceDir)\erfadatextra.c" />
+    <ClCompile Include="$(ERFASourceDir)\fad03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fae03.c" />
+    <ClCompile Include="$(ERFASourceDir)\faf03.c" />
+    <ClCompile Include="$(ERFASourceDir)\faju03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fal03.c" />
+    <ClCompile Include="$(ERFASourceDir)\falp03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fama03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fame03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fane03.c" />
+    <ClCompile Include="$(ERFASourceDir)\faom03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fapa03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fasa03.c" />
+    <ClCompile Include="$(ERFASourceDir)\faur03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fave03.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk425.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk45z.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk524.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk52h.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk54z.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk5hip.c" />
+    <ClCompile Include="$(ERFASourceDir)\fk5hz.c" />
+    <ClCompile Include="$(ERFASourceDir)\fw2m.c" />
+    <ClCompile Include="$(ERFASourceDir)\fw2xy.c" />
+    <ClCompile Include="$(ERFASourceDir)\g2icrs.c" />
+    <ClCompile Include="$(ERFASourceDir)\gc2gd.c" />
+    <ClCompile Include="$(ERFASourceDir)\gc2gde.c" />
+    <ClCompile Include="$(ERFASourceDir)\gd2gc.c" />
+    <ClCompile Include="$(ERFASourceDir)\gd2gce.c" />
+    <ClCompile Include="$(ERFASourceDir)\gmst00.c" />
+    <ClCompile Include="$(ERFASourceDir)\gmst06.c" />
+    <ClCompile Include="$(ERFASourceDir)\gmst82.c" />
+    <ClCompile Include="$(ERFASourceDir)\gst00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\gst00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\gst06.c" />
+    <ClCompile Include="$(ERFASourceDir)\gst06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\gst94.c" />
+    <ClCompile Include="$(ERFASourceDir)\h2fk5.c" />
+    <ClCompile Include="$(ERFASourceDir)\hd2ae.c" />
+    <ClCompile Include="$(ERFASourceDir)\hd2pa.c" />
+    <ClCompile Include="$(ERFASourceDir)\hfk5z.c" />
+    <ClCompile Include="$(ERFASourceDir)\icrs2g.c" />
+    <ClCompile Include="$(ERFASourceDir)\ir.c" />
+    <ClCompile Include="$(ERFASourceDir)\jd2cal.c" />
+    <ClCompile Include="$(ERFASourceDir)\jdcalf.c" />
+    <ClCompile Include="$(ERFASourceDir)\ld.c" />
+    <ClCompile Include="$(ERFASourceDir)\ldn.c" />
+    <ClCompile Include="$(ERFASourceDir)\ldsun.c" />
+    <ClCompile Include="$(ERFASourceDir)\lteceq.c" />
+    <ClCompile Include="$(ERFASourceDir)\ltecm.c" />
+    <ClCompile Include="$(ERFASourceDir)\lteqec.c" />
+    <ClCompile Include="$(ERFASourceDir)\ltp.c" />
+    <ClCompile Include="$(ERFASourceDir)\ltpb.c" />
+    <ClCompile Include="$(ERFASourceDir)\ltpecl.c" />
+    <ClCompile Include="$(ERFASourceDir)\ltpequ.c" />
+    <ClCompile Include="$(ERFASourceDir)\moon98.c" />
+    <ClCompile Include="$(ERFASourceDir)\num00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\num00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\num06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\numat.c" />
+    <ClCompile Include="$(ERFASourceDir)\nut00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\nut00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\nut06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\nut80.c" />
+    <ClCompile Include="$(ERFASourceDir)\nutm80.c" />
+    <ClCompile Include="$(ERFASourceDir)\obl06.c" />
+    <ClCompile Include="$(ERFASourceDir)\obl80.c" />
+    <ClCompile Include="$(ERFASourceDir)\p06e.c" />
+    <ClCompile Include="$(ERFASourceDir)\p2pv.c" />
+    <ClCompile Include="$(ERFASourceDir)\p2s.c" />
+    <ClCompile Include="$(ERFASourceDir)\pap.c" />
+    <ClCompile Include="$(ERFASourceDir)\pas.c" />
+    <ClCompile Include="$(ERFASourceDir)\pb06.c" />
+    <ClCompile Include="$(ERFASourceDir)\pdp.c" />
+    <ClCompile Include="$(ERFASourceDir)\pfw06.c" />
+    <ClCompile Include="$(ERFASourceDir)\plan94.c" />
+    <ClCompile Include="$(ERFASourceDir)\pm.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmat00.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmat06.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmat76.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmp.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmpx.c" />
+    <ClCompile Include="$(ERFASourceDir)\pmsafe.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn00.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn06.c" />
+    <ClCompile Include="$(ERFASourceDir)\pn06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\pnm00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\pnm00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\pnm06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\pnm80.c" />
+    <ClCompile Include="$(ERFASourceDir)\pom00.c" />
+    <ClCompile Include="$(ERFASourceDir)\ppp.c" />
+    <ClCompile Include="$(ERFASourceDir)\ppsp.c" />
+    <ClCompile Include="$(ERFASourceDir)\pr00.c" />
+    <ClCompile Include="$(ERFASourceDir)\prec76.c" />
+    <ClCompile Include="$(ERFASourceDir)\pv2p.c" />
+    <ClCompile Include="$(ERFASourceDir)\pv2s.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvdpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvm.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvmpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvppv.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvstar.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvtob.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvu.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvup.c" />
+    <ClCompile Include="$(ERFASourceDir)\pvxpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\pxp.c" />
+    <ClCompile Include="$(ERFASourceDir)\refco.c" />
+    <ClCompile Include="$(ERFASourceDir)\rm2v.c" />
+    <ClCompile Include="$(ERFASourceDir)\rv2m.c" />
+    <ClCompile Include="$(ERFASourceDir)\rx.c" />
+    <ClCompile Include="$(ERFASourceDir)\rxp.c" />
+    <ClCompile Include="$(ERFASourceDir)\rxpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\rxr.c" />
+    <ClCompile Include="$(ERFASourceDir)\ry.c" />
+    <ClCompile Include="$(ERFASourceDir)\rz.c" />
+    <ClCompile Include="$(ERFASourceDir)\s00.c" />
+    <ClCompile Include="$(ERFASourceDir)\s00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\s00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\s06.c" />
+    <ClCompile Include="$(ERFASourceDir)\s06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\s2c.c" />
+    <ClCompile Include="$(ERFASourceDir)\s2p.c" />
+    <ClCompile Include="$(ERFASourceDir)\s2pv.c" />
+    <ClCompile Include="$(ERFASourceDir)\s2xpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\sepp.c" />
+    <ClCompile Include="$(ERFASourceDir)\seps.c" />
+    <ClCompile Include="$(ERFASourceDir)\sp00.c" />
+    <ClCompile Include="$(ERFASourceDir)\starpm.c" />
+    <ClCompile Include="$(ERFASourceDir)\starpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\sxp.c" />
+    <ClCompile Include="$(ERFASourceDir)\sxpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\taitt.c" />
+    <ClCompile Include="$(ERFASourceDir)\taiut1.c" />
+    <ClCompile Include="$(ERFASourceDir)\taiutc.c" />
+    <ClCompile Include="$(ERFASourceDir)\tcbtdb.c" />
+    <ClCompile Include="$(ERFASourceDir)\tcgtt.c" />
+    <ClCompile Include="$(ERFASourceDir)\tdbtcb.c" />
+    <ClCompile Include="$(ERFASourceDir)\tdbtt.c" />
+    <ClCompile Include="$(ERFASourceDir)\tf2a.c" />
+    <ClCompile Include="$(ERFASourceDir)\tf2d.c" />
+    <ClCompile Include="$(ERFASourceDir)\tpors.c" />
+    <ClCompile Include="$(ERFASourceDir)\tporv.c" />
+    <ClCompile Include="$(ERFASourceDir)\tpsts.c" />
+    <ClCompile Include="$(ERFASourceDir)\tpstv.c" />
+    <ClCompile Include="$(ERFASourceDir)\tpxes.c" />
+    <ClCompile Include="$(ERFASourceDir)\tpxev.c" />
+    <ClCompile Include="$(ERFASourceDir)\tr.c" />
+    <ClCompile Include="$(ERFASourceDir)\trxp.c" />
+    <ClCompile Include="$(ERFASourceDir)\trxpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\tttai.c" />
+    <ClCompile Include="$(ERFASourceDir)\tttcg.c" />
+    <ClCompile Include="$(ERFASourceDir)\tttdb.c" />
+    <ClCompile Include="$(ERFASourceDir)\ttut1.c" />
+    <ClCompile Include="$(ERFASourceDir)\ut1tai.c" />
+    <ClCompile Include="$(ERFASourceDir)\ut1tt.c" />
+    <ClCompile Include="$(ERFASourceDir)\ut1utc.c" />
+    <ClCompile Include="$(ERFASourceDir)\utctai.c" />
+    <ClCompile Include="$(ERFASourceDir)\utcut1.c" />
+    <ClCompile Include="$(ERFASourceDir)\xy06.c" />
+    <ClCompile Include="$(ERFASourceDir)\xys00a.c" />
+    <ClCompile Include="$(ERFASourceDir)\xys00b.c" />
+    <ClCompile Include="$(ERFASourceDir)\xys06a.c" />
+    <ClCompile Include="$(ERFASourceDir)\zp.c" />
+    <ClCompile Include="$(ERFASourceDir)\zpv.c" />
+    <ClCompile Include="$(ERFASourceDir)\zr.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AstroCalc\AstroCalc.h" />
@@ -39,26 +289,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -80,12 +330,17 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <ERFASourceDir>E:\coding\erfa\src</ERFASourceDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ERFASourceDir);..\AstroCalc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,6 +355,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ERFASourceDir);..\AstroCalc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,6 +371,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ERFASourceDir);..\AstroCalc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,6 +387,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ERFASourceDir);..\AstroCalc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

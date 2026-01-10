@@ -71,3 +71,13 @@ ASTROCALC_API void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec);
 
 // Compute the angular separation of two coordinates
 ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
+
+// ERFA-based coordinate conversions (AstroCalcERFA.c)
+// Convert J2000.0 (ICRS) coordinates to JNOW (CIRS) coordinates
+void J2000_to_JNOW(double ra_j2000, double dec_j2000, double jd_tt,
+                   double pr, double pd, double px, double rv,
+                   double* ra_jnow, double* dec_jnow);
+
+// Convert JNOW (CIRS) coordinates to J2000.0 (ICRS) coordinates
+void JNOW_to_J2000(double ra_jnow, double dec_jnow, double jd_tt,
+                   double* ra_j2000, double* dec_j2000);
