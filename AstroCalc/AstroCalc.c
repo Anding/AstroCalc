@@ -248,20 +248,18 @@ int date_after_epoch(int days)
     return (r);
 }
 
-// Obtain GST given the days since the Epoch and UT at Greenwich
-int UTtoGST(int D, int T)
-// T is UT expressed as an integer number of seconds since 0h
+// Obtain GST given the date and UT at Greenwich
+int UTtoGST_ext(int yyyymmdd, int hhmmss)
 // GST is returned as an integer number of seconds since 0h
 {
-    double JD = 0.0, GST = 0.0;
-    int h = 0, m = 0, s = 0, A = 0, r = 0;
+    double JD = 0.0, GST = 0.0, r = 0.0;
+    int y = 0, m = 0, d = 0;
+    int h = 0, mm = 0, s = 0;
 
-    JD = EPOCH + D;
-    s = T % 60;
-    A = T / 60;
-    m = A % 60;
-    h = A / 60;
-    GST = UTGST(JD, h, m, s);
+	ff_to_triple(yyyymmdd, &y, &m, &d);
+    ff_to_triple(hhmmss, &h, &mm, &s);
+	JD = CDJD(d, m, y);
+    GST = UTGST(JD, h, mm, s);
     r = SEC(GST);
     return(r);
 }

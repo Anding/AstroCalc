@@ -71,7 +71,7 @@ ASTROCALC_API int days_since_epoch(int yyyymmdd);
 ASTROCALC_API int date_after_epoch(int days);
 
 // Obtain GST given the days since the Epoch and UT at Greenwich
-ASTROCALC_API int UTtoGST(int D, int T);
+ASTROCALC_API int UTtoGST_ext(int yyyymmdd, int hhmmss);
 
 // Convert equatorial to horizon coordinates
 ASTROCALC_API void EQtoHZ_ext(int H, int dec, int lat, int* alt, int* az);

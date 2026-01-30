@@ -11,9 +11,9 @@ include "%idir%\ForthAstroCalc.f"
 variable alt
 variable az
 
-05 51 44 ~time
-23 13 10 ~angle
-52 00 00 ~angle
+05 51 44 ~
+23 13 10 ~
+52 00 00 ~
 alt
 az
 EQtoHZ_ext

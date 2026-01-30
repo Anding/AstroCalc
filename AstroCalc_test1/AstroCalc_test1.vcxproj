@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -22,7 +22,12 @@
     <ClCompile Include="..\AstroCalc\AstroCalc.c" />
     <ClCompile Include="AstroCalc_test1.c" Condition="'$(Configuration)'=='DisabledByERFATest'" />
     <ClCompile Include="..\AstroCalc\AstroCalcERFA.c" />
-    <ClCompile Include="AstroCalcERFA_Tests.c" />
+    <ClCompile Include="AstroCalcERFA_Tests.c">
+      <PrecompiledHeader Condition="'`$(Configuration)|`$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'`$(Configuration)|`$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'`$(Configuration)|`$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'`$(Configuration)|`$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="$(ERFASourceDir)\a2af.c" />
     <ClCompile Include="$(ERFASourceDir)\a2tf.c" />
     <ClCompile Include="$(ERFASourceDir)\ab.c" />
