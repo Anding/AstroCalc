@@ -98,8 +98,8 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 	then
 ;
 
-: %interval ( T - T)
-\ adjust an hour angle expressed in seconds to within -11h59m59ss - 12h00m00ss
+: %clockDiff ( T - T)
+\ adjust a time difference expressed in seconds to within -11h59m59ss - 12h00m00ss
     24HOURS /mod    ( seconds days)
     drop 
     dup 12HOURS negate <= if
@@ -120,6 +120,11 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 : UTtoGST ( yymmdd hhmmss - T)
 \ convert a UT date and time to GST   
     UTtoGST_ext
+;
+
+: RAtoHA ( RA LST -- HA)
+\ convert the RA to Hour Angle using LST
+    swap - %clockDiff
 ;
 
 : EpochTimetoGST ( T -- T)
