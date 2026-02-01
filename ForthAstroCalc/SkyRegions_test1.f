@@ -3,24 +3,10 @@ need simple-tester
 include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions.f
 
 BEGIN-REGIONSET is-where?
-
-s" no region" sky-default anywhere?
-
-s" Orion Nebula region" 
-	05 35 17 RA -05 23 15 Dec 
-	05 00 00 DEGMMSS 
-sky-circle M42?
-
-s" Pisces region" 
-	00 00 00 RA 00 00 00 Dec 
-	02 00 00 RA 20 00 00 Dec 
-sky-strip Pisces?
-
-s" Square of Pegasus" 
-	23 00 00 RA 15 00 00 Dec 
-	00 30 00 RA 30 00 00 Dec 
-sky-strip Pegasus?
-
+                                                    s" no region"           sky-default anywhere?
+05 35 17 RA -05 23 15 Dec 05 00 00 DEGMMSS          s" Orion Nebula region" sky-circle M42?
+00 00 00 RA  00 00 00 Dec 02 00 00 RA  20 00 00 Dec s" Pisces region"       sky-strip Pisces?
+23 00 00 RA  15 00 00 Dec 00 30 00 RA  30 00 00 Dec s" Square of Pegasus"   sky-strip Pegasus?
 END-REGIONSET
 
 Tstart

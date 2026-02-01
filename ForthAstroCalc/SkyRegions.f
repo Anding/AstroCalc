@@ -15,15 +15,15 @@ need AstroCalc
 : sky-circle
 \ create a sky region that is a circle around a point
 \ RA and Dec are finite fractions in single integer format
-create  ( caddr u RA Dec rad <name> --) 
-	>R >R , R> , R> , $, ( pfa: RA DEC rad u c1 c2 ... cn)
+create  ( RA Dec rad caddr u <name> --) 
+	2>R >R swap , , R> , 2R> $, ( pfa: RA DEC rad u c1 c2 ... cn)
 	
 \ test if a coordinate lies within the region
 DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 	( pfa) >R
-	R@ @ 				( RA' Dec' RA)
+	R@ @            ( RA' Dec' RA)
 	R@ 1 cells+ @	( RA' Dec' RA Dec)
-	ang_sep 			( deg)
+	ang_sep         ( deg)
 	R@ 2 cells+ @	( deg rad)
 	< if
 		R> 3 cells+ count -1
@@ -35,7 +35,7 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 : box-test { RA' Dec' RA1 Dec1 RA2 Dec2 | f -- flag }
 \ test whether a coordinate lies within a bounding box
 \ RA' Dec' is the test coordinate
-\ RA1 Dec1 is the south-west coordinate, RA2 Dec2 is the north-east coordinate
+\ RA1 < RA2 unless crossing RA=00 and Dec1 < Dec 2
 \ of the bounding box
 	Dec' Dec1 >=
 	Dec' Dec2 <	
@@ -53,8 +53,8 @@ DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
 : sky-strip
 \ create a sky region that is a strip
 \ RA1 and Dec1 is the south-west co0rodinate, RA2 and Dec2 is the north-east coordinate
-create  ( caddr u RA1 Dec1 RA2 Dec2 <name> --) 
-	>R >R >R , R> , R> , R> , $, ( pfa: RA1 Dec1 RA2 Dec2 u c1 c2 ... cn)
+create  ( RA1 Dec1 RA2 Dec2 caddr u <name> --) 
+	2>R 2>R swap , , 2R> swap , , 2R> $, ( pfa: RA1 Dec1 RA2 Dec2 u c1 c2 ... cn)
 
 \ test if a coordinate lies within the region
 DOES> ( RA Dec -- caddr u TRUE | FALSE)
