@@ -8,6 +8,9 @@ int main()
 {
     int version_number = version();
     printf("Version number %d\n", version_number);
+    
+    double UT = GSTUT(2444351.5, 04, 40, 05);
+    printf("UT at JD 24443511.5 GST 04:40:05 is %f\n", UT);
 
     double JD = CDJD(19.75, 6, 2009);
     printf("2009-06-19.75 is Julian Date %f\n", JD);

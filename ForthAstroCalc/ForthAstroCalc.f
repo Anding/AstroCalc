@@ -18,10 +18,15 @@ Extern: int "C" days_since_epoch ( int yymmdd) ;
 Extern: int "C" date_after_epoch ( int days) ;
 \ return the calendar date ( yymmdd format) of a number of days since the Epoch
 
-Extern: int "C" UTtoGST_ext (int DDMMYY, int UT) ;
+Extern: int "C" UTtoGST_ext (int YYMMDD, int UT) ;
 \ return the GST of a given date and time at Greenwich
-\ D is the date expressed as number of days since the epoch
-\ T is Ut expressed as seconds-of-the day
+\ D is in YYMMDD format
+\ T is UT expressed as seconds-of-the day
+
+Extern: int "C" GSTtoUT_ext (int YYMMDD, int GST) ;
+\ return the UT of a given date and time at Greenwich
+\ D is in YYMMDD format
+\ T is SGT expressed as seconds-of-the day
 
 Extern: void "C" EQtoHZ_ext(int H, int dec, int lat, int * alt, int * az) ;
 \ Convert equatorial to horizon coordinates
@@ -120,6 +125,11 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 : UTtoGST ( yymmdd hhmmss - T)
 \ convert a UT date and time to GST   
     UTtoGST_ext
+;
+
+: GSTtoUT ( yymmdd hhmmss - T)
+\ convert a GST on a date to GST   
+    GSTtoUT_ext
 ;
 
 : RAtoHA ( RA LST -- HA)

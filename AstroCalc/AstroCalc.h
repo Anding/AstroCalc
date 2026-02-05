@@ -13,7 +13,7 @@
 #define EPOCH 2455196.5	// 2010 January 0.0
 #define RAD(x) ((x) * M_PI / 180.0)					// convert degrees to radians
 #define DEG(x) ((x) * 180.0 / M_PI)					// convert radians to degrees
-#define SEC(x) (int)trunc((x) * 3600.0 + 0.5)		// convert decimal hours to integer seconds
+#define SEC(x) (int) (trunc((x) * 3600.0 + 0.5))    // convert decimal hours to integer seconds
 
 // Convert a calendar date at Greenwich to a Julian Date; PA 4
 double CDJD(double GD, int GM, int GY);
@@ -70,8 +70,11 @@ ASTROCALC_API int days_since_epoch(int yyyymmdd);
 // Convert at calendar date at Greenwich to the number of days since the EPOCH
 ASTROCALC_API int date_after_epoch(int days);
 
-// Obtain GST given the days since the Epoch and UT at Greenwich
+// Obtain GST given the calendar date at Greenwich and UT at Greenwich
 ASTROCALC_API int UTtoGST_ext(int yyyymmdd, int hhmmss);
+
+// Obtain UT given the calendar date at Greenwich and GST at Greenwich
+ASTROCALC_API int GSTtoUT_ext(int yyyymmdd, int hhmmss);
 
 // Convert equatorial to horizon coordinates
 ASTROCALC_API void EQtoHZ_ext(int H, int dec, int lat, int* alt, int* az);

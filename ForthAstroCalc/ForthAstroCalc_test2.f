@@ -56,7 +56,8 @@ T{ 2026 01 30 18 00 00 EpochTime LTtoUT }T 2026 01 30 10 00 00 EpochTime  ==
 T{ 04 40 05 ~ GSTtoLST }T 00 24 05 ~ ==
 T{ 00 24 05 ~ LSTtoGST }T 04 40 05 ~ ==
 
-T{ 2012 04 01 ~ 23 30 00 ~ UTtoGST }T 12 12 53 ~ ==
+T{ 1980 04 22 ~ 14 36 52 ~ UTtoGST }T 04 40 06 ~ ==
+T{ 1980 04 22 ~ 04 40 05 ~ GSTtoUT }T 14 36 51 ~ ==
 
 CR ." Coordinate conversion" CR
 

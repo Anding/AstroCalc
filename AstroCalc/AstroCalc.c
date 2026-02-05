@@ -3,6 +3,47 @@
 
 #include "AstroCalc.h"
 #include <time.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+// Enable logging by defining ENABLE_ASTRO_LOG (e.g. in this file or via compiler define).
+// #define ENABLE_ASTRO_LOG 1
+
+static void astro_log(const char *fmt, ...)
+{
+#ifdef ENABLE_ASTRO_LOG
+    FILE *f = NULL;
+    errno_t err = fopen_s(&f, "E:\\coding\\AstroCalc\\AstroCalc\\AstroCalcLog.txt", "a");
+    if (err != 0 || f == NULL) return;
+
+    time_t now = time(NULL);
+    struct tm tmnow;
+    localtime_s(&tmnow, &now);
+    fprintf(f, "%04d-%02d-%02d %02d:%02d:%02d ",
+        tmnow.tm_year + 1900, tmnow.tm_mon + 1, tmnow.tm_mday,
+        tmnow.tm_hour, tmnow.tm_min, tmnow.tm_sec);
+
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(f, fmt, ap);
+    va_end(ap);
+
+    fprintf(f, "\n");
+    fflush(f);
+    fclose(f);
+#endif
+}
+
+// Normalize a time value into the range [0.0, 24.0)
+static double mod24_positive(double t)
+{
+    double r = fmod(t, 24.0);
+    if (r < 0.0)
+    {
+        r += 24.0;
+    }
+    return r;
+}
 
 // Convert a calendar date at Greenwich to a Julian Date; PA 4
 double CDJD(double GD, int GM, int GY)
@@ -69,16 +110,45 @@ void JDCD(double JD, double* GD, int* GM, int* GY)
 // Obtain GST given the Julian date at 0h and UT; PA 12
 double UTGST(double JD, int h, int m, int s)
 {
-    double S = 0.0, T = 0.0, T0 = 0.0, UT = 0.0, A = 0.0, GST = 0.0;
+    double S = 0.0, T = 0.0, T0 = 0.0, UT = 0.0, A = 0.0, B = 0.0, GST = 0.0;
     S = JD - 2451545.0;
     T = S / 36525.0;
     T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
-    T0 = fmod(T0, 24.0);
-    UT = ((s / 60.0) + m) / 60 + h;
-    UT = UT * 1.002737909;
-    T0 = T0 + UT;
-    GST = fmod(T0, 24.0);
+    T0 = mod24_positive(T0);
+    UT = ((s / 60.0) + m) / 60.0 + h;
+    A = UT * 1.002737909;
+    B = A + T0;
+    GST = mod24_positive(B);
     return(GST);
+}
+
+// Obtain UT given the Julian date at 0h and GST; PA 13
+double GSTUT(double JD, int h, int m, int s)
+{
+    double S = 0.0, T = 0.0, T0 = 0.0, UT = 0.0, A = 0.0, B= 0.0, GST = 0.0;
+    S = JD - 2451545.0;
+    T = S / 36525.0;
+    T0 = 6.697374558 + (2400.051336 * T) + (0.000025862 * T * T);
+
+    astro_log("GSTUT start: JD=%.9f, h=%d, m=%d, s=%d", JD, h, m, s);
+    astro_log("computed S=%.9f, T=%.12f, T0_before_mod=%.12f", S, T, T0);
+
+    T0 = mod24_positive(T0);
+    astro_log("T0_after_mod=%.12f", T0);
+
+    GST = ((s / 60.0) + m) / 60.0 + h;
+    astro_log("input GST_as_hours(before_scale)=%.12f", GST);
+
+    A = GST - T0;
+    astro_log("raw A = GST - T0 = %.12f", A);
+
+    B = mod24_positive(A);
+    astro_log("A_normalized=B=%.12f", B);
+
+    UT = B * 0.9972695663;
+    astro_log("final UT (hours) = %.12f", UT);
+
+    return(UT);
 }
 
 // Obtain the azimuth and altitude given the hour angle and declination; PA 25
@@ -261,6 +331,21 @@ int UTtoGST_ext(int yyyymmdd, int hhmmss)
 	JD = CDJD(d, m, y);
     GST = UTGST(JD, h, mm, s);
     r = SEC(GST);
+    return(r);
+}
+
+// Obtain UT given the date and GST at Greenwich
+int GSTtoUT_ext(int yyyymmdd, int hhmmss)
+{
+    double JD = 0.0, UT = 0.0, r = 0.0;
+    int y = 0, m = 0, d = 0;
+    int h = 0, mm = 0, s = 0;
+
+	ff_to_triple(yyyymmdd, &y, &m, &d);
+    ff_to_triple(hhmmss, &h, &mm, &s);
+	JD = CDJD(d, m, y);
+    UT = GSTUT(JD, h, mm, s);
+    r = SEC(UT);
     return(r);
 }
 
