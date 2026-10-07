@@ -405,6 +405,78 @@ int ang_sep(int H1, int dec1, int H2, int dec2)
     return(a);
 }
 
+typedef struct
+{
+    double x;
+    double y;
+    double z;
+} unit_vector;
+
+static unit_vector equatorial_unit_vector(int ra, int dec)
+{
+    double ra_radians = RAD(ff_to_decimal(ra) * 15.0);
+    double dec_radians = RAD(ff_to_decimal(dec));
+    double cos_dec = cos(dec_radians);
+    unit_vector result = {
+        cos_dec * cos(ra_radians),
+        cos_dec * sin(ra_radians),
+        sin(dec_radians)
+    };
+    return result;
+}
+
+int spherical_polygon_contains(int ra, int dec, const int* vertices, int vertex_count)
+{
+    const double epsilon = 1e-12;
+    unit_vector point;
+    double reference_sign = 0.0;
+    int i;
+
+    if (vertices == NULL || vertex_count < 3)
+    {
+        return 0;
+    }
+
+    point = equatorial_unit_vector(ra, dec);
+
+    for (i = 0; i < vertex_count; i++)
+    {
+        int next = (i + 1) % vertex_count;
+        unit_vector a = equatorial_unit_vector(vertices[2 * i], vertices[2 * i + 1]);
+        unit_vector b = equatorial_unit_vector(vertices[2 * next], vertices[2 * next + 1]);
+        unit_vector normal = {
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        };
+        double normal_length_squared =
+            normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+        double side;
+
+        if (normal_length_squared <= epsilon * epsilon)
+        {
+            return 0;
+        }
+
+        side = normal.x * point.x + normal.y * point.y + normal.z * point.z;
+        if (fabs(side) <= epsilon)
+        {
+            continue;
+        }
+
+        if (reference_sign == 0.0)
+        {
+            reference_sign = side;
+        }
+        else if ((reference_sign > 0.0) != (side > 0.0))
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 // Convert J2000 <> JNOW
 void J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int* RA_JNOW, int* DEC_JNOW)
 // RA is expressed in integer seconds

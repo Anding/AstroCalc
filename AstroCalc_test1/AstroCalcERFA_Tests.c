@@ -50,7 +50,7 @@ void test_roundtrip_conversion() {
     
     // Original J2000 coordinates (Vega approximate)
     double ra_j2000_orig = HOURS2RAD(18.615);     // 18h 36m 54s
-    double dec_j2000_orig = DEG2RAD(38.783);      // +38° 47'
+    double dec_j2000_orig = DEG2RAD(38.783);      // +38ï¿½ 47'
     
     // Julian Date for 2024-01-01 TT
     double jd_tt = 2460310.5;
@@ -107,7 +107,7 @@ void test_precession_effect() {
     // JD for J2050.0 (50 years later)
     double jd_2050 = 2451545.0 + 365.25 * 50;
     
-    printf("Testing star at celestial equator (RA=0h, Dec=0°)\n");
+    printf("Testing star at celestial equator (RA=0h, Dec=0ï¿½)\n");
     printf("From J2000.0 to J2050.0 (50 years)\n\n");
     
     // Convert to 2050
@@ -145,7 +145,7 @@ void test_proper_motion() {
     
     // Barnard's Star J2000 coordinates (epoch 2000.0)
     double ra_j2000 = HOURS2RAD(17.9634);      // 17h 57m 48.5s
-    double dec_j2000 = DEG2RAD(4.6933);        // +04° 41' 36"
+    double dec_j2000 = DEG2RAD(4.6933);        // +04ï¿½ 41' 36"
     
     // Proper motion (one of the highest known)
     double pm_ra = ARCSEC2RAD(-798.58e-3);     // -798.58 mas/yr
@@ -157,7 +157,7 @@ void test_proper_motion() {
     
     printf("Barnard's Star (one of the nearest stars):\n");
     printf("  J2000 RA:  %.6f rad (%.4fh)\n", ra_j2000, RAD2HOURS(ra_j2000));
-    printf("  J2000 Dec: %.6f rad (%.4f°)\n", dec_j2000, RAD2DEG(dec_j2000));
+    printf("  J2000 Dec: %.6f rad (%.4fï¿½)\n", dec_j2000, RAD2DEG(dec_j2000));
     printf("  Proper motion: %.3f mas/yr (RA), %.3f mas/yr (Dec)\n", 
            pm_ra * 648000000.0 / M_PI, pm_dec * 648000000.0 / M_PI);
     printf("  Parallax: %.3f arcsec (distance ~%.2f ly)\n", parallax, 3.26 / parallax);
@@ -182,16 +182,16 @@ void test_proper_motion() {
     
     printf("Position in 2024 (with proper motion):\n");
     printf("  RA:  %.6f rad (%.4fh)\n", ra_2024_with_pm, RAD2HOURS(ra_2024_with_pm));
-    printf("  Dec: %.6f rad (%.4f°)\n\n", dec_2024_with_pm, RAD2DEG(dec_2024_with_pm));
+    printf("  Dec: %.6f rad (%.4fï¿½)\n\n", dec_2024_with_pm, RAD2DEG(dec_2024_with_pm));
     
     printf("Proper motion effect over 24 years (2000-2024):\n");
     printf("  ?RA:  %.3f arcsec\n", ra_pm_effect);
     printf("  ?Dec: %.3f arcsec\n\n", dec_pm_effect);
     
     // Expected: Dec should change by ~10.3 arcsec/yr * 24 yr = ~247 arcsec
-    double expected_dec_change = 10328.12e-3 * 24.0 / 1000.0;  // mas/yr * years / 1000 = arcsec
-    assert_near("Proper motion Dec effect (arcsec)", 
-                dec_pm_effect, expected_dec_change / 1000.0, 1.0);
+    double expected_dec_change = 10328.12 * 24.0 / 1000.0;  // mas/yr * years / 1000 = arcsec
+    assert_near("Proper motion Dec effect (arcsec)",
+                dec_pm_effect, expected_dec_change, 1.0);
     
     print_test_footer();
 }
@@ -202,11 +202,11 @@ void test_multiple_epochs() {
     
     // Polaris (close to north celestial pole)
     double ra_j2000 = HOURS2RAD(2.530);        // ~2h 31m 49s
-    double dec_j2000 = DEG2RAD(89.264);        // ~89° 15' 51"
+    double dec_j2000 = DEG2RAD(89.264);        // ~89ï¿½ 15' 51"
     
     printf("Polaris (near north celestial pole):\n");
     printf("  J2000 RA:  %.6f rad (%.4fh)\n", ra_j2000, RAD2HOURS(ra_j2000));
-    printf("  J2000 Dec: %.6f rad (%.4f°)\n\n", dec_j2000, RAD2DEG(dec_j2000));
+    printf("  J2000 Dec: %.6f rad (%.4fï¿½)\n\n", dec_j2000, RAD2DEG(dec_j2000));
     
     // Test different epochs
     double epochs[] = {
@@ -228,9 +228,9 @@ void test_multiple_epochs() {
         
         double year = 2000.0 + (epochs[i] - 2451545.0) / 365.25;
         printf("  Epoch %.1f (JD %.1f):\n", year, epochs[i]);
-        printf("    RA:  %.6f rad (%.4fh, %.4f°)\n", 
+        printf("    RA:  %.6f rad (%.4fh, %.4fï¿½)\n",
                ra_now, RAD2HOURS(ra_now), RAD2DEG(ra_now));
-        printf("    Dec: %.6f rad (%.4f°)\n\n", 
+        printf("    Dec: %.6f rad (%.4fï¿½)\n\n",
                dec_now, RAD2DEG(dec_now));
     }
     
@@ -261,12 +261,12 @@ void test_edge_cases() {
     }
     
     // Case 2: North celestial pole
-    printf("Case 2: North celestial pole (Dec=90°)\n");
+    printf("Case 2: North celestial pole (Dec=90ï¿½)\n");
     J2000_to_JNOW(0.0, M_PI / 2.0, 2460310.5, 0.0, 0.0, 0.0, 0.0, &ra_jnow, &dec_jnow);
-    printf("  Result: RA=%.6f, Dec=%.6f rad (%.4f°)\n", 
+    printf("  Result: RA=%.6f, Dec=%.6f rad (%.4fï¿½)\n",
            ra_jnow, dec_jnow, RAD2DEG(dec_jnow));
     if (isfinite(ra_jnow) && isfinite(dec_jnow) && dec_jnow > 1.5) {
-        printf("  [PASS] Valid result (Dec near 90°)\n\n");
+        printf("  [PASS] Valid result (Dec near 90ï¿½)\n\n");
         tests_passed++;
     } else {
         printf("  [FAIL] Invalid result\n\n");
@@ -274,12 +274,12 @@ void test_edge_cases() {
     }
     
     // Case 3: South celestial pole
-    printf("Case 3: South celestial pole (Dec=-90°)\n");
+    printf("Case 3: South celestial pole (Dec=-90ï¿½)\n");
     J2000_to_JNOW(0.0, -M_PI / 2.0, 2460310.5, 0.0, 0.0, 0.0, 0.0, &ra_jnow, &dec_jnow);
-    printf("  Result: RA=%.6f, Dec=%.6f rad (%.4f°)\n", 
+    printf("  Result: RA=%.6f, Dec=%.6f rad (%.4fï¿½)\n",
            ra_jnow, dec_jnow, RAD2DEG(dec_jnow));
     if (isfinite(ra_jnow) && isfinite(dec_jnow) && dec_jnow < -1.5) {
-        printf("  [PASS] Valid result (Dec near -90°)\n\n");
+        printf("  [PASS] Valid result (Dec near -90ï¿½)\n\n");
         tests_passed++;
     } else {
         printf("  [FAIL] Invalid result\n\n");
@@ -343,6 +343,57 @@ void test_accuracy() {
     print_test_footer();
 }
 
+void assert_equal_int(const char* test_name, int actual, int expected) {
+    if (actual == expected) {
+        printf("[PASS] %s: %d\n", test_name, actual);
+        tests_passed++;
+    } else {
+        printf("[FAIL] %s: %d (expected %d)\n", test_name, actual, expected);
+        tests_failed++;
+    }
+}
+
+void test_spherical_polygons() {
+    const int wrap_polygon[] = {
+        23 * 3600, 10 * 3600,
+        1 * 3600, 10 * 3600,
+        1 * 3600, 30 * 3600,
+        23 * 3600, 30 * 3600
+    };
+    const int wrap_polygon_reversed[] = {
+        23 * 3600, 30 * 3600,
+        1 * 3600, 30 * 3600,
+        1 * 3600, 10 * 3600,
+        23 * 3600, 10 * 3600
+    };
+    const int degenerate_polygon[] = {
+        0, 0,
+        0, 0,
+        1 * 3600, 10 * 3600
+    };
+
+    print_test_header("TEST 7: Convex Spherical Polygons");
+    assert_equal_int(
+        "RA-wrap polygon contains 00h,+20",
+        spherical_polygon_contains(0, 20 * 3600, wrap_polygon, 4), 1);
+    assert_equal_int(
+        "RA-wrap polygon excludes 12h,+20",
+        spherical_polygon_contains(12 * 3600, 20 * 3600, wrap_polygon, 4), 0);
+    assert_equal_int(
+        "Reversed polygon orientation",
+        spherical_polygon_contains(0, 20 * 3600, wrap_polygon_reversed, 4), 1);
+    assert_equal_int(
+        "Polygon boundary is included",
+        spherical_polygon_contains(23 * 3600, 20 * 3600, wrap_polygon, 4), 1);
+    assert_equal_int(
+        "Fewer than three vertices is rejected",
+        spherical_polygon_contains(0, 20 * 3600, wrap_polygon, 2), 0);
+    assert_equal_int(
+        "Degenerate edge is rejected",
+        spherical_polygon_contains(0, 20 * 3600, degenerate_polygon, 3), 0);
+    print_test_footer();
+}
+
 // Main test runner
 int main() {
     printf("\n");
@@ -358,6 +409,7 @@ int main() {
     test_multiple_epochs();
     test_edge_cases();
     test_accuracy();
+    test_spherical_polygons();
     
     // Print summary
     printf("\n");
@@ -373,5 +425,3 @@ int main() {
     
     return (tests_failed == 0) ? 0 : 1;
 }
-
-

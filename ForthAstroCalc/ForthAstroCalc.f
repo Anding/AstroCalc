@@ -43,6 +43,10 @@ Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
 \ dec is expressed in DEGMMSS format
 \ H is expressed in integer seconds
 
+Extern: int "C" spherical_polygon_contains(int RA, int Dec, int * vertices, int vertex_count) ;
+\ Test whether a coordinate is inside a convex spherical polygon
+\ vertices contains packed RA, Dec pairs in declaration order
+
 Extern: void "C" J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int * RA_JNOW, int * DEC_JNOW);
 \ Convert J2000 to JNOW
 \ RA is expressed in integer seconds
@@ -188,4 +192,3 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
     ADDR RA_JNOW ADDR DEC_JNOW
     J2000toJNOW ( --) RA_JNOW DEC_JNOW
 ;
-

@@ -1,109 +1,211 @@
-\ a system to define custom regions of the sky
-
-\ Each region may be:
-\ 	a sky circle within a given radius of a coordinate
-\ 	a sky strip within a box bounded by south-west and north-east coordinates
-\ regions are created as Forth words with the stack effect ( RA Dec -- caddr u TRUE | FALSE) that test if a given coordinate is within the region
-
-\ Region definitions may be organized into a list
-\ lists are created as Forth words with the stack effect ( RA Dec -- caddr y ) that return the first region containing the given coordinate
-\ lists are assembled in reverse search order ( the first region added is the last region tested)
-\ rule: each list must match every coordinate  - a default region that matches all coordinates is provided
+\ Structured named regions of the J2000 sky
 
 need AstroCalc
 
-: sky-circle
-\ create a sky region that is a circle around a point
-\ RA and Dec are finite fractions in single integer format
-create  ( RA Dec rad caddr u <name> --) 
-	2>R >R swap , , R> , 2R> $, ( pfa: RA DEC rad u c1 c2 ... cn)
-	
-\ test if a coordinate lies within the region
-DOES> ( RA' Dec' -- caddr u TRUE | FALSE)
-	( pfa) >R
-	R@ @            ( RA' Dec' RA)
-	R@ 1 cells+ @	( RA' Dec' RA Dec)
-	ang_sep         ( deg)
-	R@ 2 cells+ @	( deg rad)
-	< if
-		R> 3 cells+ count -1
-	else
-		R> drop 0
-	then
+0 cells constant REGION.NEXT
+1 cells constant REGION.PREDICATE
+2 cells constant REGION.ID
+3 cells constant REGION.LABEL
+4 cells constant REGION.DATA0
+5 cells constant REGION.DATA1
+6 cells constant REGION.DATA2
+7 cells constant REGION.DATA3
+8 cells constant /REGION
+
+0 cells constant REGIONSET.ID
+1 cells constant REGIONSET.LABEL
+2 cells constant REGIONSET.FITS
+3 cells constant REGIONSET.FIRST
+4 cells constant REGIONSET.LAST
+5 cells constant /REGIONSET
+
+0 value active-region-set
+0 value sky-polygon-start
+0 value sky-polygon-count
+0 value sky-polygon-building
+
+: store-region-string ( caddr u field -- )
+	>R here R> ! $,
 ;
 
-: box-test { RA' Dec' RA1 Dec1 RA2 Dec2 | f -- flag }
-\ test whether a coordinate lies within a bounding box
-\ RA' Dec' is the test coordinate
-\ RA1 < RA2 unless crossing RA=00 and Dec1 < Dec 2
-\ of the bounding box
-	Dec' Dec1 >=
-	Dec' Dec2 <	
-	and
-	0= if 0 exit then
-	RA' RA1 >=
-	RA' RA2 <
-	RA1 RA2 > if 		\ wrap around RA 00 so adjust the RA tests
-		xor
+: compile-region-header
+	{ predicate id-addr id-u label-addr label-u | region -- region }
+	id-u 0= abort" Region ID must not be empty"
+	label-u 0= abort" Region label must not be empty"
+	here to region
+	0 , predicate , 0 , 0 , 0 , 0 , 0 , 0 ,
+	id-addr id-u region REGION.ID + store-region-string
+	label-addr label-u region REGION.LABEL + store-region-string
+	region
+;
+
+: append-region { region | last -- }
+	active-region-set 0= if exit then
+	active-region-set REGIONSET.LAST + @ to last
+	last 0= if
+		region active-region-set REGIONSET.FIRST + !
 	else
-		and
+		region last REGION.NEXT + !
 	then
+	region active-region-set REGIONSET.LAST + !
+;
+
+: region-id ( region -- caddr u )
+	REGION.ID + @ count
+;
+
+: region-label ( region -- caddr u )
+	REGION.LABEL + @ count
+;
+
+: region-inside? ( RA Dec region -- flag )
+	dup REGION.PREDICATE + @ execute
+;
+
+: circle-region-inside? { RA Dec region -- flag }
+	RA Dec
+	region REGION.DATA0 + @
+	region REGION.DATA1 + @
+	ang_sep
+	region REGION.DATA2 + @ <=
+;
+
+: box-test { RA Dec RA1 Dec1 RA2 Dec2 -- flag }
+	Dec Dec1 >= Dec Dec2 < and 0= if 0 exit then
+	RA RA1 >= RA RA2 <
+	RA1 RA2 > if xor else and then
+;
+
+: strip-region-inside? { RA Dec region -- flag }
+	RA Dec
+	region REGION.DATA0 + @
+	region REGION.DATA1 + @
+	region REGION.DATA2 + @
+	region REGION.DATA3 + @
+	box-test
+;
+
+: default-region-inside? ( RA Dec region -- flag )
+	drop 2drop -1
+;
+
+: polygon-region-inside? { RA Dec region -- flag }
+	RA Dec
+	region REGION.DATA0 + @
+	region REGION.DATA1 + @
+	spherical_polygon_contains 0<>
+;
+
+: sky-circle
+	{ center-RA center-Dec radius id-addr id-u label-addr label-u -- }
+	create
+	['] circle-region-inside?
+	id-addr id-u label-addr label-u compile-region-header
+	dup >R
+	center-RA R@ REGION.DATA0 + !
+	center-Dec R@ REGION.DATA1 + !
+	radius R@ REGION.DATA2 + !
+	R> append-region
+DOES> ( -- region )
 ;
 
 : sky-strip
-\ create a sky region that is a strip
-\ RA1 and Dec1 is the south-west co0rodinate, RA2 and Dec2 is the north-east coordinate
-create  ( RA1 Dec1 RA2 Dec2 caddr u <name> --) 
-	2>R 2>R swap , , 2R> swap , , 2R> $, ( pfa: RA1 Dec1 RA2 Dec2 u c1 c2 ... cn)
-
-\ test if a coordinate lies within the region
-DOES> ( RA Dec -- caddr u TRUE | FALSE)
-	( pfa) >R
-	R@ @ 				( RA' Dec' RA1)
-	R@ 1 cells+ @	( RA' Dec' RA1 Dec1)
-	R@ 2 cells+ @	( RA' Dec' RA1 Dec1 RA2)	
-	R@ 3 cells+ @	( RA' Dec' RA1 Dec1 RA2 Dec2)	
-	box-test if
-		R> 4 cells+ count -1
-	else
-		R> drop 0
-	then
-;   
+	{ RA1 Dec1 RA2 Dec2 id-addr id-u label-addr label-u -- }
+	create
+	['] strip-region-inside?
+	id-addr id-u label-addr label-u compile-region-header
+	dup >R
+	RA1 R@ REGION.DATA0 + !
+	Dec1 R@ REGION.DATA1 + !
+	RA2 R@ REGION.DATA2 + !
+	Dec2 R@ REGION.DATA3 + !
+	R> append-region
+DOES> ( -- region )
+;
 
 : sky-default
-\ create a sky region that matches any coordinate
-create ( caddr u <name> --)
-	$,
-	
-DOES> ( RA Dec -- caddr u TRUE)
-	( pfa) nip nip count -1
+	{ id-addr id-u label-addr label-u -- }
+	create
+	['] default-region-inside?
+	id-addr id-u label-addr label-u compile-region-header
+	append-region
+DOES> ( -- region )
 ;
 
-\ an iterator supplied to traverse-wordlist
-: iterate-regions ( RA Dec nfa -- flag RA Dec)	\ nfa = name field address in the VFX dictionary header
-	name>interpret ( RA Dec xt)
-	>R 2dup R>		( RA Dec RA Dec xt)
-	execute 			( RA Dec FALSE | RA Dec c-addr u TRUE)
-	?dup 0=			( RA Dec TRUE  | RA Dec c-addr u TRUE FALSE)	
-	\ top flag tells traverse-wordlist whether or not to continue
+: BEGIN-SKY-POLYGON ( -- )
+	sky-polygon-building abort" Nested sky polygon"
+	here to sky-polygon-start
+	0 to sky-polygon-count
+	-1 to sky-polygon-building
 ;
 
-\ organize region definitions into a named list
-: BEGIN-REGIONSET ( <name>)
-	get-current wordlist ( current-wid wid) 	
-	create ( wid <name> -- current-wid )
-		dup , dup set-current +order
-		
-	DOES> ( RA Dec -- c-addr u)
-	\ find the first region in the list matching the given coordinate
-		( pfa) @ ( wid) ['] iterate-regions swap traverse-wordlist
-		( RA Dec c-addr u TRUE )							\ rule: every list must match every coordinate; use default region if necessary
-		drop rot drop rot drop ( c-addr u)
+: SKY-VERTEX ( RA Dec -- )
+	sky-polygon-building 0= abort" SKY-VERTEX outside sky polygon"
+	swap , ,
+	sky-polygon-count 1+ to sky-polygon-count
 ;
 
-\ end the list of region definitions
-: END-REGIONSET ( wid)
-	set-current
+: END-SKY-POLYGON
+	{ id-addr id-u label-addr label-u -- }
+	sky-polygon-building 0= abort" END-SKY-POLYGON without BEGIN-SKY-POLYGON"
+	sky-polygon-count 3 < if
+		0 to sky-polygon-building
+		abort" A sky polygon needs at least three vertices"
+	then
+	create
+	['] polygon-region-inside?
+	id-addr id-u label-addr label-u compile-region-header
+	dup >R
+	sky-polygon-start R@ REGION.DATA0 + !
+	sky-polygon-count R@ REGION.DATA1 + !
+	R> append-region
+	0 to sky-polygon-building
+DOES> ( -- region )
 ;
 
+: BEGIN-REGIONSET
+	{ id-addr id-u label-addr label-u fits-addr fits-u | set -- }
+	active-region-set abort" Nested region set"
+	id-u 0= abort" Region set ID must not be empty"
+	label-u 0= abort" Region set label must not be empty"
+	fits-u 0= fits-u 8 > or abort" FITS name must contain 1..8 characters"
+	create
+	here to set
+	0 , 0 , 0 , 0 , 0 ,
+	id-addr id-u set REGIONSET.ID + store-region-string
+	label-addr label-u set REGIONSET.LABEL + store-region-string
+	fits-addr fits-u set REGIONSET.FITS + store-region-string
+	set to active-region-set
+DOES> ( -- region-set )
+;
+
+: END-REGIONSET ( -- )
+	active-region-set 0= abort" END-REGIONSET without BEGIN-REGIONSET"
+	active-region-set REGIONSET.LAST + @
+	dup 0= abort" Empty region set"
+	REGION.PREDICATE + @ ['] default-region-inside? <>
+	abort" Region set must end with a default region"
+	0 to active-region-set
+;
+
+: region-set-id ( region-set -- caddr u )
+	REGIONSET.ID + @ count
+;
+
+: region-set-label ( region-set -- caddr u )
+	REGIONSET.LABEL + @ count
+;
+
+: region-set-fits-name ( region-set -- caddr u )
+	REGIONSET.FITS + @ count
+;
+
+: classify-region-set { RA Dec region-set | region -- region|0 }
+	region-set REGIONSET.FIRST + @ to region
+	begin region while
+		RA Dec region region-inside? if region exit then
+		region REGION.NEXT + @ to region
+	repeat
+	0
+;
 

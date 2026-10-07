@@ -85,6 +85,12 @@ ASTROCALC_API void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec);
 // Compute the angular separation of two coordinates
 ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
 
+// Test whether a coordinate is inside a convex spherical polygon.
+// RA values are integer seconds; Dec values use DEGMMSS finite fractions.
+// vertices contains vertex_count consecutive (RA, Dec) integer pairs.
+ASTROCALC_API int spherical_polygon_contains(
+    int ra, int dec, const int* vertices, int vertex_count);
+
 // J2000 to JNOW
 ASTROCALC_API void J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int* RA_JNOW, int* DEC_JNOW);
 
