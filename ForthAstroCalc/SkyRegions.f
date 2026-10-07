@@ -1,7 +1,13 @@
 \ Structured named regions of the J2000 sky
+\
+\ Region and region-set words return parameter-field addresses.  All region
+\ records share one header and dispatch through a stored predicate xt, so
+\ callers use one API regardless of geometry.  An open region set collects
+\ newly defined regions into an explicit forward-linked list in source order.
 
 need AstroCalc
 
+\ Common region record.  Geometry defining words own DATA0..DATA3.
 0 cells constant REGION.NEXT
 1 cells constant REGION.PREDICATE
 2 cells constant REGION.ID
@@ -12,6 +18,7 @@ need AstroCalc
 7 cells constant REGION.DATA3
 8 cells constant /REGION
 
+\ Region-set record.  FIRST and LAST support ordered append while compiling.
 0 cells constant REGIONSET.ID
 1 cells constant REGIONSET.LABEL
 2 cells constant REGIONSET.FITS
@@ -19,17 +26,22 @@ need AstroCalc
 4 cells constant REGIONSET.LAST
 5 cells constant /REGIONSET
 
+\ These values are catalogue-construction state, not runtime search state.
+\ Set and polygon declarations are intentionally non-nestable.
 0 value active-region-set
 0 value sky-polygon-start
 0 value sky-polygon-count
 0 value sky-polygon-building
 
 : store-region-string ( caddr u field -- )
+\ Compile a counted string and make field point to it.
 	>R here R> ! $,
 ;
 
 : compile-region-header
 	{ predicate id-addr id-u label-addr label-u | region -- region }
+\ Compile the geometry-independent part of a region record.
+\ The caller fills DATA0..DATA3 and then calls append-region.
 	id-u 0= abort" Region ID must not be empty"
 	label-u 0= abort" Region label must not be empty"
 	here to region
@@ -40,6 +52,8 @@ need AstroCalc
 ;
 
 : append-region { region | last -- }
+\ Append in declaration order when a set is open.  Outside a set the region
+\ remains a useful standalone object.
 	active-region-set 0= if exit then
 	active-region-set REGIONSET.LAST + @ to last
 	last 0= if
@@ -51,18 +65,24 @@ need AstroCalc
 ;
 
 : region-id ( region -- caddr u )
+\ Return the stable machine-readable identity.
 	REGION.ID + @ count
 ;
 
 : region-label ( region -- caddr u )
+\ Return the human-readable display label.
 	REGION.LABEL + @ count
 ;
 
 : region-inside? ( RA Dec region -- flag )
+\ Dispatch without exposing the geometry-specific record contents.
+\ DUP leaves the region address below the predicate xt for EXECUTE.
 	dup REGION.PREDICATE + @ execute
 ;
 
 : circle-region-inside? { RA Dec region -- flag }
+\ DATA0=center RA, DATA1=center Dec, DATA2=angular radius.
+\ Circle boundaries are included.
 	RA Dec
 	region REGION.DATA0 + @
 	region REGION.DATA1 + @
@@ -71,12 +91,15 @@ need AstroCalc
 ;
 
 : box-test { RA Dec RA1 Dec1 RA2 Dec2 -- flag }
+\ Test a half-open RA/Dec rectangle.  RA1>RA2 denotes a rectangle crossing
+\ 00h; XOR then selects either side of the discontinuity.
 	Dec Dec1 >= Dec Dec2 < and 0= if 0 exit then
 	RA RA1 >= RA RA2 <
 	RA1 RA2 > if xor else and then
 ;
 
 : strip-region-inside? { RA Dec region -- flag }
+\ DATA0..DATA3 contain RA1, Dec1, RA2, Dec2.
 	RA Dec
 	region REGION.DATA0 + @
 	region REGION.DATA1 + @
@@ -86,10 +109,13 @@ need AstroCalc
 ;
 
 : default-region-inside? ( RA Dec region -- flag )
+\ The final region in every set supplies total classification.
 	drop 2drop -1
 ;
 
 : polygon-region-inside? { RA Dec region -- flag }
+\ DATA0 points to packed RA/Dec cells and DATA1 is the vertex count.
+\ The C function performs the numerical great-circle half-space tests.
 	RA Dec
 	region REGION.DATA0 + @
 	region REGION.DATA1 + @
@@ -98,6 +124,7 @@ need AstroCalc
 
 : sky-circle
 	{ center-RA center-Dec radius id-addr id-u label-addr label-u -- }
+\ Define a word returning a circle region record.
 	create
 	['] circle-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -111,6 +138,7 @@ DOES> ( -- region )
 
 : sky-strip
 	{ RA1 Dec1 RA2 Dec2 id-addr id-u label-addr label-u -- }
+\ Define a word returning a half-open RA/Dec strip record.
 	create
 	['] strip-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -125,6 +153,7 @@ DOES> ( -- region )
 
 : sky-default
 	{ id-addr id-u label-addr label-u -- }
+\ Define an unconditional region, normally the last declaration in a set.
 	create
 	['] default-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -133,6 +162,7 @@ DOES> ( -- region )
 ;
 
 : BEGIN-SKY-POLYGON ( -- )
+\ Remember where the packed vertex array begins in the dictionary.
 	sky-polygon-building abort" Nested sky polygon"
 	here to sky-polygon-start
 	0 to sky-polygon-count
@@ -140,6 +170,7 @@ DOES> ( -- region )
 ;
 
 : SKY-VERTEX ( RA Dec -- )
+\ Compile one RA,Dec pair in the order expected by AstroCalc.dll.
 	sky-polygon-building 0= abort" SKY-VERTEX outside sky polygon"
 	swap , ,
 	sky-polygon-count 1+ to sky-polygon-count
@@ -147,6 +178,9 @@ DOES> ( -- region )
 
 : END-SKY-POLYGON
 	{ id-addr id-u label-addr label-u -- }
+\ Finish the vertex array and define a word returning its polygon record.
+\ Convexity and winding are numerical concerns; only cardinality is checked
+\ while compiling the catalogue.
 	sky-polygon-building 0= abort" END-SKY-POLYGON without BEGIN-SKY-POLYGON"
 	sky-polygon-count 3 < if
 		0 to sky-polygon-building
@@ -165,6 +199,8 @@ DOES> ( -- region )
 
 : BEGIN-REGIONSET
 	{ id-addr id-u label-addr label-u fits-addr fits-u | set -- }
+\ Define a set and make it the destination for subsequent region definitions.
+\ The FITS keyword is metadata only; this module does not publish FITS cards.
 	active-region-set abort" Nested region set"
 	id-u 0= abort" Region set ID must not be empty"
 	label-u 0= abort" Region set label must not be empty"
@@ -180,6 +216,7 @@ DOES> ( -- region-set )
 ;
 
 : END-REGIONSET ( -- )
+\ Close the active set and enforce the total-classification convention.
 	active-region-set 0= abort" END-REGIONSET without BEGIN-REGIONSET"
 	active-region-set REGIONSET.LAST + @
 	dup 0= abort" Empty region set"
@@ -189,18 +226,23 @@ DOES> ( -- region-set )
 ;
 
 : region-set-id ( region-set -- caddr u )
+\ Return the stable machine-readable set identity.
 	REGIONSET.ID + @ count
 ;
 
 : region-set-label ( region-set -- caddr u )
+\ Return the set's display label.
 	REGIONSET.LABEL + @ count
 ;
 
 : region-set-fits-name ( region-set -- caddr u )
+\ Return the validated 1..8 character FITS keyword.
 	REGIONSET.FITS + @ count
 ;
 
 : classify-region-set { RA Dec region-set | region -- region|0 }
+\ Search in declaration order and return the first matching region record.
+\ A well-formed set always reaches its final default before returning zero.
 	region-set REGIONSET.FIRST + @ to region
 	begin region while
 		RA Dec region region-inside? if region exit then
@@ -208,4 +250,3 @@ DOES> ( -- region-set )
 	repeat
 	0
 ;
-

@@ -1,5 +1,10 @@
+\ Representative named catalogues built on SkyRegions.f.
+\ Within each set, declare specific regions from highest to lowest priority
+\ and finish with exactly one default region.
+
 include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_interstellarum.f
 
+\ Recognizable naked-eye or wide-field areas.
 s" visual" s" Visual" s" REGVIS"
 BEGIN-REGIONSET visual-regions
 04 00 00 RA -15 00 00 Dec 07 00 00 RA +25 00 00 Dec
@@ -14,6 +19,7 @@ END-SKY-POLYGON summer-triangle
 s" n-a" s" n/a" sky-default visual-n-a
 END-REGIONSET
 
+\ Areas useful when selecting or organizing deep-sky observations.
 s" deep-sky" s" Deep Sky" s" REGDEEP"
 BEGIN-REGIONSET deep-sky-regions
 12 27 00 RA +12 43 00 Dec 08 00 00 DEGMMSS

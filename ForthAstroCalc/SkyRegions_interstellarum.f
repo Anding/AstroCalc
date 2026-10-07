@@ -1,4 +1,5 @@
 \ Representative Interstellarum charts; this is not yet a complete atlas catalogue.
+\ Chart records are searched in source order and the final n/a closes the set.
 
 s" interstellarum" s" Interstellarum" s" REGATLAS"
 BEGIN-REGIONSET interstellarum-regions
