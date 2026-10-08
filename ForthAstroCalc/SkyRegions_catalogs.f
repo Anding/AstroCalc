@@ -1,12 +1,12 @@
 \ Representative named catalogues built on SkyRegions.f.
-\ Within each set, declare specific regions from highest to lowest priority
+\ Within each list, declare specific regions from highest to lowest priority
 \ and finish with exactly one default region.
 
 include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_interstellarum.f
 
 \ Recognizable naked-eye or wide-field areas.
-s" visual" s" Visual" s" REGVIS"
-BEGIN-REGIONSET visual-regions
+s" Visual" s" REGVIS"
+BEGIN-REGIONLIST visual-regions
 04 00 00 RA -15 00 00 Dec 07 00 00 RA +25 00 00 Dec
 	s" orion-quadrant" s" Orion quadrant" sky-strip orion-quadrant
 BEGIN-SKY-POLYGON
@@ -17,11 +17,11 @@ BEGIN-SKY-POLYGON
 s" summer-triangle" s" Summer Triangle"
 END-SKY-POLYGON summer-triangle
 s" n-a" s" n/a" sky-default visual-n-a
-END-REGIONSET
+END-REGIONLIST
 
 \ Areas useful when selecting or organizing deep-sky observations.
-s" deep-sky" s" Deep Sky" s" REGDEEP"
-BEGIN-REGIONSET deep-sky-regions
+s" Deep Sky" s" REGDEEP"
+BEGIN-REGIONLIST deep-sky-regions
 12 27 00 RA +12 43 00 Dec 08 00 00 DEGMMSS
 	s" virgo-cluster" s" Virgo galaxy cluster" sky-circle virgo-galaxy-cluster
 BEGIN-SKY-POLYGON
@@ -32,4 +32,4 @@ BEGIN-SKY-POLYGON
 s" cygnus-milky-way" s" Cygnus Milky Way"
 END-SKY-POLYGON cygnus-milky-way
 s" n-a" s" n/a" sky-default deep-sky-n-a
-END-REGIONSET
+END-REGIONLIST

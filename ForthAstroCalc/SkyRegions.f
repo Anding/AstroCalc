@@ -1,9 +1,9 @@
 \ Structured named regions of the J2000 sky
 \
-\ Region and region-set words return parameter-field addresses.  All region
-\ records share one header and dispatch through a stored predicate xt, so
-\ callers use one API regardless of geometry.  An open region set collects
-\ newly defined regions into an explicit forward-linked list in source order.
+\ Region and regionlist words return parameter-field addresses.  All region
+\ records share one header and dispatch through a stored predicate xt.  An
+\ open regionlist collects regions in source order; END-REGIONLIST then links
+\ the completed list into the global list consulted by imaging metadata.
 
 need AstroCalc
 
@@ -18,17 +18,21 @@ need AstroCalc
 7 cells constant REGION.DATA3
 8 cells constant /REGION
 
-\ Region-set record.  FIRST and LAST support ordered append while compiling.
-0 cells constant REGIONSET.ID
-1 cells constant REGIONSET.LABEL
-2 cells constant REGIONSET.FITS
-3 cells constant REGIONSET.FIRST
-4 cells constant REGIONSET.LAST
-5 cells constant /REGIONSET
+\ Regionlist records are also linked in inclusion order.  The record address
+\ returned by the defining word is its identity; only its display name and
+\ FITS key need stored strings.
+0 cells constant REGIONLIST.NEXT
+1 cells constant REGIONLIST.NAME
+2 cells constant REGIONLIST.FITS
+3 cells constant REGIONLIST.FIRST
+4 cells constant REGIONLIST.LAST
+5 cells constant /REGIONLIST
 
 \ These values are catalogue-construction state, not runtime search state.
-\ Set and polygon declarations are intentionally non-nestable.
-0 value active-region-set
+\ Regionlist and polygon declarations are intentionally non-nestable.
+0 value active-regionlist
+0 value first-regionlist
+0 value last-regionlist
 0 value sky-polygon-start
 0 value sky-polygon-count
 0 value sky-polygon-building
@@ -52,16 +56,16 @@ need AstroCalc
 ;
 
 : append-region { region | last -- }
-\ Append in declaration order when a set is open.  Outside a set the region
+\ Append in declaration order when a list is open.  Outside a list the region
 \ remains a useful standalone object.
-	active-region-set 0= if exit then
-	active-region-set REGIONSET.LAST + @ to last
+	active-regionlist 0= if exit then
+	active-regionlist REGIONLIST.LAST + @ to last
 	last 0= if
-		region active-region-set REGIONSET.FIRST + !
+		region active-regionlist REGIONLIST.FIRST + !
 	else
 		region last REGION.NEXT + !
 	then
-	region active-region-set REGIONSET.LAST + !
+	region active-regionlist REGIONLIST.LAST + !
 ;
 
 : region-id ( region -- caddr u )
@@ -109,7 +113,7 @@ need AstroCalc
 ;
 
 : default-region-inside? ( RA Dec region -- flag )
-\ The final region in every set supplies total classification.
+\ The final region in every list supplies total classification.
 	drop 2drop -1
 ;
 
@@ -153,7 +157,7 @@ DOES> ( -- region )
 
 : sky-default
 	{ id-addr id-u label-addr label-u -- }
-\ Define an unconditional region, normally the last declaration in a set.
+\ Define an unconditional region, normally the last declaration in a list.
 	create
 	['] default-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -197,53 +201,58 @@ DOES> ( -- region )
 DOES> ( -- region )
 ;
 
-: BEGIN-REGIONSET
-	{ id-addr id-u label-addr label-u fits-addr fits-u | set -- }
-\ Define a set and make it the destination for subsequent region definitions.
-\ The FITS keyword is metadata only; this module does not publish FITS cards.
-	active-region-set abort" Nested region set"
-	id-u 0= abort" Region set ID must not be empty"
-	label-u 0= abort" Region set label must not be empty"
+: BEGIN-REGIONLIST
+	{ name-addr name-u fits-addr fits-u | list -- }
+\ Define a named list and make it the destination for subsequent regions.
+\ The completed list becomes active automatically at END-REGIONLIST.
+	active-regionlist abort" Nested regionlist"
+	name-u 0= abort" Regionlist name must not be empty"
 	fits-u 0= fits-u 8 > or abort" FITS name must contain 1..8 characters"
 	create
-	here to set
+	here to list
 	0 , 0 , 0 , 0 , 0 ,
-	id-addr id-u set REGIONSET.ID + store-region-string
-	label-addr label-u set REGIONSET.LABEL + store-region-string
-	fits-addr fits-u set REGIONSET.FITS + store-region-string
-	set to active-region-set
-DOES> ( -- region-set )
+	name-addr name-u list REGIONLIST.NAME + store-region-string
+	fits-addr fits-u list REGIONLIST.FITS + store-region-string
+	list to active-regionlist
+DOES> ( -- regionlist )
 ;
 
-: END-REGIONSET ( -- )
-\ Close the active set and enforce the total-classification convention.
-	active-region-set 0= abort" END-REGIONSET without BEGIN-REGIONSET"
-	active-region-set REGIONSET.LAST + @
-	dup 0= abort" Empty region set"
+: END-REGIONLIST { | list -- }
+\ Close, validate, and activate the list in inclusion order.  Catalogue files
+\ need no registration word: if a regionlist is included, it is used.
+	active-regionlist 0= abort" END-REGIONLIST without BEGIN-REGIONLIST"
+	active-regionlist to list
+	list REGIONLIST.LAST + @
+	dup 0= abort" Empty regionlist"
 	REGION.PREDICATE + @ ['] default-region-inside? <>
-	abort" Region set must end with a default region"
-	0 to active-region-set
+	abort" Regionlist must end with a default region"
+	last-regionlist 0= if
+		list to first-regionlist
+	else
+		list last-regionlist REGIONLIST.NEXT + !
+	then
+	list to last-regionlist
+	0 to active-regionlist
 ;
 
-: region-set-id ( region-set -- caddr u )
-\ Return the stable machine-readable set identity.
-	REGIONSET.ID + @ count
+: regionlist-name ( regionlist -- caddr u )
+\ Return the human-readable list name.
+	REGIONLIST.NAME + @ count
 ;
 
-: region-set-label ( region-set -- caddr u )
-\ Return the set's display label.
-	REGIONSET.LABEL + @ count
-;
-
-: region-set-fits-name ( region-set -- caddr u )
+: regionlist-fits-key ( regionlist -- caddr u )
 \ Return the validated 1..8 character FITS keyword.
-	REGIONSET.FITS + @ count
+	REGIONLIST.FITS + @ count
 ;
 
-: classify-region-set { RA Dec region-set | region -- region|0 }
+: next-regionlist ( regionlist -- next-regionlist )
+	REGIONLIST.NEXT + @
+;
+
+: search-regionlist { RA Dec regionlist | region -- region|0 }
 \ Search in declaration order and return the first matching region record.
-\ A well-formed set always reaches its final default before returning zero.
-	region-set REGIONSET.FIRST + @ to region
+\ A well-formed list always reaches its final default before returning zero.
+	regionlist REGIONLIST.FIRST + @ to region
 	begin region while
 		RA Dec region region-inside? if region exit then
 		region REGION.NEXT + @ to region

@@ -2,7 +2,7 @@
 
 `SkyRegions.f` classifies a J2000 right-ascension/declination coordinate
 against named regions of the sky. Regions are collected into independent,
-ordered region sets: an atlas set, a visual-observing set, and a deep-sky set
+ordered regionlists: an atlas list, a visual-observing list, and a deep-sky list
 can therefore classify the same coordinate differently.
 
 The module is declarative Forth. Defining words compile fixed-layout records
@@ -157,75 +157,76 @@ regions, or add a future spherical winding predicate.
 s" n-a" s" n/a" sky-default visual-n-a
 ```
 
-A default matches every coordinate. Every region set must contain at least
-one region and must end with a default. `END-REGIONSET` enforces this rule.
+A default matches every coordinate. Every regionlist must contain at least
+one region and must end with a default. `END-REGIONLIST` enforces this rule.
 
-## Region sets
+## Regionlists
 
-A region set word also returns a record:
+A regionlist word also returns a record:
 
 ```forth
-set-name  ( -- region-set )
+list-name  ( -- regionlist )
 ```
 
-Declare a set with its stable ID, display label, and FITS keyword:
+Declare a list with its display name and FITS keyword:
 
 ```forth
-s" visual" s" Visual" s" REGVIS"
-BEGIN-REGIONSET visual-regions
+s" Visual" s" REGVIS"
+BEGIN-REGIONLIST visual-regions
 
     \ Specific regions, in priority order.
 
     s" n-a" s" n/a" sky-default visual-n-a
-END-REGIONSET
+END-REGIONLIST
 ```
 
-The FITS name must contain one to eight characters. Empty set IDs and labels,
-nested sets, empty sets, and sets without a final default are rejected while
-the catalogue is being loaded.
+The FITS key must contain one to eight characters. Empty names, nested lists,
+empty lists, and lists without a final default are rejected while the
+catalogue is being loaded.
 
-Region declaration order is classification priority. The first matching
+Region declaration order is search priority. The first matching
 region wins:
 
 ```forth
-classify-region-set  ( RA Dec region-set -- region|0 )
+search-regionlist  ( RA Dec regionlist -- region|0 )
 ```
 
 For example:
 
 ```forth
 05 30 00 RA 00 00 00 Dec
-visual-regions classify-region-set
+visual-regions search-regionlist
 dup region-id type
 space region-label type
 ```
 
-Because a valid set ends in a default, classification normally returns a
+Because a valid list ends in a default, searching normally returns a
 region. The `0` result remains part of the general API for malformed or
-manually constructed set records.
+manually constructed regionlist records.
 
-Set metadata is available through:
+Regionlist metadata is available through:
 
 ```forth
-region-set-id         ( region-set -- caddr u )
-region-set-label      ( region-set -- caddr u )
-region-set-fits-name  ( region-set -- caddr u )
+regionlist-name      ( regionlist -- caddr u )
+regionlist-fits-key  ( regionlist -- caddr u )
+next-regionlist      ( regionlist -- next-regionlist )
 ```
 
-The module does not write FITS headers. A publisher can classify a
-coordinate, use `region-set-fits-name` as the keyword, and use `region-id` as
-the stable value. The display label can be published separately or shown to
-the observer.
+`END-REGIONLIST` automatically appends each completed list to the chain
+starting at `first-regionlist`. Inclusion is activation: code which does not
+want a catalogue does not include it. The module does not itself write FITS
+headers. An imaging pipeline can walk the chain, use `regionlist-fits-key` as
+the keyword, and use the matched `region-id` as the stable value.
 
 ## Independent classifications
 
-Sets do not inherit from one another and do not share search state. The same
+Regionlists do not inherit from one another and do not share search state. The same
 coordinate can be classified independently:
 
 ```forth
-RA-value Dec-value interstellarum-regions classify-region-set
-RA-value Dec-value visual-regions          classify-region-set
-RA-value Dec-value deep-sky-regions        classify-region-set
+RA-value Dec-value interstellarum-regions search-regionlist
+RA-value Dec-value visual-regions          search-regionlist
+RA-value Dec-value deep-sky-regions        search-regionlist
 ```
 
 `SkyRegions_catalogs.f` currently supplies representative, not exhaustive,
@@ -264,7 +265,7 @@ implementation does. If a future geometry needs more state, store a pointer
 to a separately compiled descriptor rather than changing the common record
 without also migrating every accessor.
 
-`active-region-set` and the polygon builder values are compile-time
+`active-regionlist` and the polygon builder values are compile-time
 construction state. Region and polygon declarations must not be nested.
 Runtime classification itself only reads compiled records.
 
@@ -278,7 +279,7 @@ Runtime classification itself only reads compiled records.
 - polygon boundary and winding;
 - direct invocation of the C predicate;
 - declaration-order priority;
-- representative classifications in all three supplied sets.
+- representative searches in all three supplied lists.
 
 The native polygon cases are in
 `AstroCalc_test1\AstroCalcERFA_Tests.c`.
