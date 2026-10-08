@@ -7,7 +7,9 @@
 
 need AstroCalc
 
-\ Common region record.  Geometry defining words own DATA0..DATA3.
+\ Common dictionary-resident region record.  NEXT gives a region single-list
+\ membership: do not append the same record to two lists.  PREDICATE provides
+\ geometry dispatch; defining words own DATA0..DATA3 and must document them.
 0 cells constant REGION.NEXT
 1 cells constant REGION.PREDICATE
 2 cells constant REGION.ID
@@ -18,9 +20,10 @@ need AstroCalc
 7 cells constant REGION.DATA3
 8 cells constant /REGION
 
-\ Regionlist records are also linked in inclusion order.  The record address
-\ returned by the defining word is its identity; only its display name and
-\ FITS key need stored strings.
+\ Regionlist records are also dictionary-resident and linked in inclusion
+\ order.  The record address returned by the defining word is its identity;
+\ only its display name and FITS key need stored strings.  FIRST/LAST make
+\ catalogue construction O(1) per append without relying on dictionary order.
 0 cells constant REGIONLIST.NEXT
 1 cells constant REGIONLIST.NAME
 2 cells constant REGIONLIST.FITS
@@ -29,7 +32,9 @@ need AstroCalc
 5 cells constant /REGIONLIST
 
 \ These values are catalogue-construction state, not runtime search state.
-\ Regionlist and polygon declarations are intentionally non-nestable.
+\ Regionlist and polygon declarations are intentionally non-nestable.  The
+\ first/last pair is the permanent session registry: there is deliberately no
+\ removal or activation layer because inclusion means use.
 0 value active-regionlist
 0 value first-regionlist
 0 value last-regionlist
@@ -38,14 +43,17 @@ need AstroCalc
 0 value sky-polygon-building
 
 : store-region-string ( caddr u field -- )
-\ Compile a counted string and make field point to it.
+\ Copy a string into permanent dictionary storage and make field point to it.
+\ Callers may therefore pass transient input strings; region records own the
+\ compiled copies for the lifetime of the dictionary.
 	>R here R> ! $,
 ;
 
 : compile-region-header
 	{ predicate id-addr id-u label-addr label-u | region -- region }
 \ Compile the geometry-independent part of a region record.
-\ The caller fills DATA0..DATA3 and then calls append-region.
+\ The caller fills DATA0..DATA3 and then calls append-region.  HERE is saved
+\ before the counted strings because the fixed offsets address only the header.
 	id-u 0= abort" Region ID must not be empty"
 	label-u 0= abort" Region label must not be empty"
 	here to region
@@ -57,7 +65,8 @@ need AstroCalc
 
 : append-region { region | last -- }
 \ Append in declaration order when a list is open.  Outside a list the region
-\ remains a useful standalone object.
+\ remains a useful standalone object.  REGION.NEXT must still be zero from
+\ compile-region-header; one region record cannot safely belong to two lists.
 	active-regionlist 0= if exit then
 	active-regionlist REGIONLIST.LAST + @ to last
 	last 0= if
@@ -80,7 +89,8 @@ need AstroCalc
 
 : region-inside? ( RA Dec region -- flag )
 \ Dispatch without exposing the geometry-specific record contents.
-\ DUP leaves the region address below the predicate xt for EXECUTE.
+\ DUP leaves the region address below the predicate xt for EXECUTE.  Every
+\ geometry predicate therefore receives both the query coordinate and record.
 	dup REGION.PREDICATE + @ execute
 ;
 
@@ -96,7 +106,8 @@ need AstroCalc
 
 : box-test { RA Dec RA1 Dec1 RA2 Dec2 -- flag }
 \ Test a half-open RA/Dec rectangle.  RA1>RA2 denotes a rectangle crossing
-\ 00h; XOR then selects either side of the discontinuity.
+\ 00h; XOR then selects either side of the discontinuity.  Half-open bounds
+\ let adjacent catalogue strips meet without matching twice at an edge.
 	Dec Dec1 >= Dec Dec2 < and 0= if 0 exit then
 	RA RA1 >= RA RA2 <
 	RA1 RA2 > if xor else and then
@@ -166,7 +177,8 @@ DOES> ( -- region )
 ;
 
 : BEGIN-SKY-POLYGON ( -- )
-\ Remember where the packed vertex array begins in the dictionary.
+\ Remember where the packed vertex array begins in the dictionary.  Vertices
+\ are compiled before the region record, which later points back to this array.
 	sky-polygon-building abort" Nested sky polygon"
 	here to sky-polygon-start
 	0 to sky-polygon-count
@@ -174,7 +186,8 @@ DOES> ( -- region )
 ;
 
 : SKY-VERTEX ( RA Dec -- )
-\ Compile one RA,Dec pair in the order expected by AstroCalc.dll.
+\ Compile one RA,Dec pair in the order expected by AstroCalc.dll.  SWAP makes
+\ memory contain RA followed by Dec even though comma consumes stack top first.
 	sky-polygon-building 0= abort" SKY-VERTEX outside sky polygon"
 	swap , ,
 	sky-polygon-count 1+ to sky-polygon-count
@@ -184,7 +197,8 @@ DOES> ( -- region )
 	{ id-addr id-u label-addr label-u -- }
 \ Finish the vertex array and define a word returning its polygon record.
 \ Convexity and winding are numerical concerns; only cardinality is checked
-\ while compiling the catalogue.
+\ while compiling the catalogue.  DATA0 owns the stable dictionary address;
+\ DATA1 is the vertex count passed unchanged to the C predicate.
 	sky-polygon-building 0= abort" END-SKY-POLYGON without BEGIN-SKY-POLYGON"
 	sky-polygon-count 3 < if
 		0 to sky-polygon-building
@@ -204,7 +218,9 @@ DOES> ( -- region )
 : BEGIN-REGIONLIST
 	{ name-addr name-u fits-addr fits-u | list -- }
 \ Define a named list and make it the destination for subsequent regions.
-\ The completed list becomes active automatically at END-REGIONLIST.
+\ The CREATE body is the list's public identity.  The completed list becomes
+\ active automatically at END-REGIONLIST, never at BEGIN, so an incomplete
+\ declaration cannot be searched through the session registry.
 	active-regionlist abort" Nested regionlist"
 	name-u 0= abort" Regionlist name must not be empty"
 	fits-u 0= fits-u 8 > or abort" FITS name must contain 1..8 characters"
@@ -219,7 +235,8 @@ DOES> ( -- regionlist )
 
 : END-REGIONLIST { | list -- }
 \ Close, validate, and activate the list in inclusion order.  Catalogue files
-\ need no registration word: if a regionlist is included, it is used.
+\ need no registration word: if a regionlist is included, it is used.  Linking
+\ only here also guarantees registered lists are non-empty and end in default.
 	active-regionlist 0= abort" END-REGIONLIST without BEGIN-REGIONLIST"
 	active-regionlist to list
 	list REGIONLIST.LAST + @
@@ -246,12 +263,14 @@ DOES> ( -- regionlist )
 ;
 
 : next-regionlist ( regionlist -- next-regionlist )
+\ Traverse the automatic registry without exposing the NEXT field offset.
 	REGIONLIST.NEXT + @
 ;
 
 : search-regionlist { RA Dec regionlist | region -- region|0 }
 \ Search in declaration order and return the first matching region record.
-\ A well-formed list always reaches its final default before returning zero.
+\ Overlap is intentional: source order is priority for every geometry.  A
+\ well-formed list always reaches its final default before returning zero.
 	regionlist REGIONLIST.FIRST + @ to region
 	begin region while
 		RA Dec region region-inside? if region exit then

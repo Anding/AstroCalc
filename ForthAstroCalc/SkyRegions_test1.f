@@ -4,7 +4,7 @@ include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions.f
 
 s" Test Regions" s" REGTEST"
 BEGIN-REGIONLIST test-regions
-05 35 17 RA -05 23 15 Dec 05 00 00 DEGMMSS
+05 35 17 RA -05 -23 -15 Dec 05 00 00 DEGMMSS
 	s" m42" s" Orion Nebula region" sky-circle M42-region
 23 00 00 RA +15 00 00 Dec 00 30 00 RA +30 00 00 Dec
 	s" pegasus" s" Square of Pegasus" sky-strip Pegasus-region
