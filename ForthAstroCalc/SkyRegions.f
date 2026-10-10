@@ -143,7 +143,7 @@ need AstroCalc
 	create
 	['] circle-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
-	dup >R
+	>R
 	center-RA R@ REGION.DATA0 + !
 	center-Dec R@ REGION.DATA1 + !
 	radius R@ REGION.DATA2 + !
@@ -157,7 +157,7 @@ DOES> ( -- region )
 	create
 	['] strip-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
-	dup >R
+	>R
 	RA1 R@ REGION.DATA0 + !
 	Dec1 R@ REGION.DATA1 + !
 	RA2 R@ REGION.DATA2 + !
@@ -207,7 +207,7 @@ DOES> ( -- region )
 	create
 	['] polygon-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
-	dup >R
+	>R
 	sky-polygon-start R@ REGION.DATA0 + !
 	sky-polygon-count R@ REGION.DATA1 + !
 	R> append-region

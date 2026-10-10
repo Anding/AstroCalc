@@ -2,6 +2,8 @@ need simple-tester
 
 include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions.f
 
+depth constant skyregions-test-depth
+
 s" Test Regions" s" REGTEST"
 BEGIN-REGIONLIST test-regions
 05 35 17 RA -05 -23 -15 Dec 05 00 00 DEGMMSS
@@ -30,6 +32,7 @@ include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_catalogs.f
 
 Tstart
 
+T{ depth }T skyregions-test-depth ==
 T{ test-regions regionlist-name hashS }T s" Test Regions" hashS ==
 T{ test-regions regionlist-fits-key hashS }T s" REGTEST" hashS ==
 T{ first-regionlist }T test-regions ==
