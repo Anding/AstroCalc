@@ -173,9 +173,13 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 
 \ Coorodinate conversion ********************************************************************************
 
-: EQtoHZ ( H dec -- alt az) { | alt az -- }
-	latitude ADDR alt ADDR az				\ use VFX locals for the pass-by-reference
+: EQtoHZ-at ( H dec lat -- alt az) { | alt az -- }
+	ADDR alt ADDR az				\ use VFX locals for the pass-by-reference
 	( H dec lat &alt &az) EQtoHZ_ext ( --) alt az
+;
+
+: EQtoHZ ( H dec -- alt az)
+	latitude EQtoHZ-at
 ;
 
 : HZtoEQ ( alt az -- H dec) { | H dec -- }
@@ -191,4 +195,26 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 : JNOW ( RA_J2000 DEC_J2000 YYMMDD -- RA_JNOW DEC_JNOW) { | RA_JNOW DEC_JNOW -- }
     ADDR RA_JNOW ADDR DEC_JNOW
     J2000toJNOW ( --) RA_JNOW DEC_JNOW
+;
+
+: J2000toHZ { RA_J2000 DEC_J2000 YYMMDD LST lat -- alt az }
+\ Convert one J2000 coordinate to horizon coordinates for an explicit context.
+	RA_J2000 DEC_J2000 YYMMDD JNOW
+	swap LST RAtoHA swap
+	lat EQtoHZ-at
+;
+
+: in-azimuth-sector? { az start-az end-az -- flag }
+\ Test an inclusive sector; start greater than end denotes a crossing of north.
+	start-az end-az <= if
+		az start-az >= az end-az <= and
+	else
+		az start-az >= az end-az <= or
+	then
+;
+
+: visible-outside-sector? { alt az start-az end-az -- flag }
+\ Require positive altitude and reject one inclusive azimuth sector.
+	alt 0 >
+	az start-az end-az in-azimuth-sector? 0= and
 ;

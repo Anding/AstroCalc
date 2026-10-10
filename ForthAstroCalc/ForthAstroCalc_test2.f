@@ -4,11 +4,6 @@ need simple-tester
 
 include "%idir%\ForthAstroCalc.f"
 
-CR CR
-." AstroCalc.dll load address " AstroCalc.dll u. CR
-.BadExterns
- CR
-
 CR ." Canonical date and time representations" CR
 Tstart
 T{ 12 30 45 ~ }T 45045 ==
@@ -64,8 +59,25 @@ CR ." Coordinate conversion" CR
 variable alt_i
 variable az_i
 T{ 05 51 44 ~ 23 13 10 ~ 52 00 00 ~ alt_i az_i EQtoHZ_ext alt_i @ az_i @ }T 19 20 04 ~ 283 16 16 ~ ==
+T{ 05 51 44 ~ 23 13 10 ~ 52 00 00 ~ EQtoHZ-at }T 19 20 04 ~ 283 16 16 ~ ==
 52 00 00 ~ -> Latitude
 T{ 05 51 44 ~ 23 13 10 ~ EQtoHZ }T 19 20 04 ~ 283 16 16 ~ ==
 T{ 19 20 04 ~ 283 16 16 ~ HZtoEQ }T 05 51 44 ~ 23 13 10 ~ ==
+
+T{ 350 00 00 ~ 300 00 00 ~ 060 00 00 ~ in-azimuth-sector? }T -1 ==
+T{ 010 00 00 ~ 300 00 00 ~ 060 00 00 ~ in-azimuth-sector? }T -1 ==
+T{ 180 00 00 ~ 300 00 00 ~ 060 00 00 ~ in-azimuth-sector? }T 0 ==
+T{ 030 00 00 ~ 020 00 00 ~ 040 00 00 ~ in-azimuth-sector? }T -1 ==
+T{ 010 00 00 ~ 020 00 00 ~ 040 00 00 ~ in-azimuth-sector? }T 0 ==
+
+T{ 45 00 00 ~ 180 00 00 ~ 300 00 00 ~ 060 00 00 ~
+   visible-outside-sector?
+}T -1 ==
+T{ 45 00 00 ~ 010 00 00 ~ 300 00 00 ~ 060 00 00 ~
+   visible-outside-sector?
+}T 0 ==
+T{ 00 00 00 ~ 180 00 00 ~ 300 00 00 ~ 060 00 00 ~
+   visible-outside-sector?
+}T 0 ==
 CR 
 Tend
