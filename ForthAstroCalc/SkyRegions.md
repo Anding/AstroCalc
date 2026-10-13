@@ -152,6 +152,11 @@ already provide one inside Forth.
 
 Arguments are centre RA, centre declination, angular radius, ID, and label.
 `ang_sep` computes spherical separation. The boundary is included.
+Negative radii are rejected before the defining word creates a record.
+`sky-circle` and AIF's `TARGET:` share `check-circle-radius` and
+`compile-circle-region`, so both use the same circle layout and predicate.
+Custom defining words must call `check-circle-radius` before creating their
+records, then use `compile-circle-region` to compile the validated circle.
 
 Catalogue target circles normally describe an association tolerance, not an
 object's apparent physical extent. AstroImagingInForth's generated Messier
@@ -192,6 +197,18 @@ label-addr label-u "name" -- )` includes both latitude and longitude
 boundaries; longitude1 > longitude2 wraps through 00h. Inverted latitude
 bounds are rejected. These predicates work unchanged in either frame.
 They are useful in nonregistered obstruction lists as well as classifications.
+
+A full-circle band uses explicit **00h to 24h** bounds:
+
+```forth
+00 00 00 RA -10 00 00 Dec 24 00 00 RA +10 00 00 Dec
+    s" all-longitudes" s" All longitudes" sky-band equatorial-band
+```
+
+Equal longitude bounds mean one meridian, not a full circle.
+Do not convert a full-circle upper bound with `azimuth>longitude`: 360 degrees
+normalises to 00h because that word converts positions, not interval extents.
+Use `24 00 00 RA` explicitly for the full-circle interval's upper bound.
 
 ### Convex spherical polygon
 

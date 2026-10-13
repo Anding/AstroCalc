@@ -79,6 +79,16 @@ meridian-indifferent value targets.meridian-side
 90 00 00 Alt value targets.maximum-altitude
 default-horizon-mask value targets.mask
 
+: with-meridian-side ( i*x side xt -- j*x )
+    { side action | previous ior -- }
+\ Execute ( i*x -- j*x ) with scoped policy, restoring it before rethrowing.
+    targets.meridian-side to previous
+    side to targets.meridian-side
+    action catch to ior
+    previous to targets.meridian-side
+    ior throw
+;
+
 : validate-target-query ( -- )
     SkyDate 0= abort" Target query needs a UTC date"
     targets.minimum-altitude targets.maximum-altitude >

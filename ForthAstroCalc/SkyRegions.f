@@ -153,18 +153,26 @@ need AstroCalc
 	spherical_polygon_contains 0<>
 ;
 
+: check-circle-radius ( radius -- )
+	0< abort" Negative region radius"
+;
+
+: compile-circle-region
+	{ center-RA center-Dec radius id-addr id-u label-addr label-u | region -- region }
+	['] circle-region-inside?
+	id-addr id-u label-addr label-u compile-region-header to region
+	center-RA region REGION.DATA0 + !
+	center-Dec region REGION.DATA1 + !
+	radius region REGION.DATA2 + !
+	region
+;
+
 : sky-circle
 	{ center-RA center-Dec radius id-addr id-u label-addr label-u -- }
-\ Define a word returning a circle region record.
-	radius 0< abort" Negative region radius"
+	radius check-circle-radius
 	create
-	['] circle-region-inside?
-	id-addr id-u label-addr label-u compile-region-header
-	>R
-	center-RA R@ REGION.DATA0 + !
-	center-Dec R@ REGION.DATA1 + !
-	radius R@ REGION.DATA2 + !
-	R> append-region
+	center-RA center-Dec radius id-addr id-u label-addr label-u
+		compile-circle-region append-region
 DOES> ( -- region )
 ;
 

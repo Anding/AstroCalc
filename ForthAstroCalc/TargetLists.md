@@ -59,6 +59,13 @@ and positive hour angles; `meridian-indifferent` imposes no restriction.
 Hour angle is calculated after precession to the snapshot date. This is a
 simple meridian split, not a prediction of a mount's overlap or slew policy.
 
+Core queries use the current `targets.meridian-side`. For a scoped override,
+`with-meridian-side ( i*x side xt -- j*x )` executes the XT with that side
+and restores the previous policy on both normal return and exception.
+The original exception is rethrown. AIF's `.targets` and `nearest-focus-star`
+use this word for their stack-supplied side; neither leaves a changed default.
+Set `targets.meridian-side` explicitly when a lasting policy change is wanted.
+
 The reusable altitude bounds are -90 through +90 degrees. The default
 obstruction mask rejects `Alt < 0`; there is no extra hidden horizon test.
 Invalid side values, inverted bounds and a missing UTC date raise errors.
@@ -105,6 +112,18 @@ no match means clear. These are ordinary coordinate-agnostic `SkyRegions`
 geometries: `sky-below` is strictly below its latitude, while `sky-band`
 and circles include boundaries. A band's longitude interval may cross 00h.
 `sky-strip` remains half-open for catalogue classification.
+
+For an all-azimuth band, use longitude bounds **00h and 24h** directly:
+
+```forth
+00 00 00 RA 35 00 00 Alt 24 00 00 RA 70 00 00 Alt
+    s" all-azimuths" s" All azimuths" sky-band all-azimuths
+```
+
+Place this declaration inside `BEGIN-HORIZON-MASK`/`END-HORIZON-MASK`.
+Equal longitude endpoints select one meridian, not the full circle.
+Do not convert 360 degrees for the upper interval bound: position
+normalisation would turn it into 00h.
 
 `horizon-blocked? ( alt az mask -- flag )` does not search equatorial FITS
 regions. It converts azimuth at the boundary using

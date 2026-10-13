@@ -30,6 +30,11 @@ BEGIN-HORIZON-MASK target-test-circle-mask
     s" circle" s" Circle" sky-circle target-test-circle
 END-HORIZON-MASK
 
+BEGIN-HORIZON-MASK target-test-full-mask
+00 00 00 RA 35 00 00 Alt 24 00 00 RA 70 00 00 Alt
+    s" full" s" Full longitude band" sky-band target-test-full-band
+END-HORIZON-MASK
+
 2000 01 01 ~ -> SkyDate
 07 00 00 RA -> LST
 0 -> Latitude
@@ -41,8 +46,17 @@ END-HORIZON-MASK
 ;
 : target-test-query ( -- ) target-test-list 06 00 00 RA 0 nearest-target drop ;
 : target-test-altaz-reference ( -- ) 45 00 00 Alt 180 00 00 Az HZtoJ2000 2drop ;
+: target-test-scoped-policy ( n -- n side ) targets.meridian-side ;
+: target-test-throw-policy ( -- ) -98 throw ;
+: target-test-scoped-error ( -- )
+    meridian-east ['] target-test-throw-policy with-meridian-side
+;
 
 Tstart
+T{ 42 meridian-east ' target-test-scoped-policy with-meridian-side }T 42 meridian-east ==
+T{ targets.meridian-side }T meridian-indifferent ==
+T{ ' target-test-scoped-error catch }T -98 ==
+T{ targets.meridian-side }T meridian-indifferent ==
 T{ depth }T target-test-depth ==
 T{ first-regionlist }T target-test-registry ==
 T{ target-test-near-a }T target-test-a-record ==
@@ -99,6 +113,13 @@ T{ 71 00 00 Alt 0 target-test-mask horizon-blocked? }T 0 ==
 T{ 50 00 00 Alt 360 00 00 Az target-test-mask horizon-blocked? }T -1 ==
 T{ 45 00 00 Alt 1 00 00 Az target-test-circle-mask horizon-blocked? }T -1 ==
 T{ 45 00 00 Alt 180 00 00 Az target-test-circle-mask horizon-blocked? }T 0 ==
+T{ 50 00 00 Alt 0 target-test-full-mask horizon-blocked? }T -1 ==
+T{ 50 00 00 Alt 180 00 00 Az target-test-full-mask horizon-blocked? }T -1 ==
+T{ 50 00 00 Alt 359 59 59 Az target-test-full-mask horizon-blocked? }T -1 ==
+T{ 50 00 00 Alt 360 00 00 Az target-test-full-mask horizon-blocked? }T -1 ==
+T{ 50 00 00 Alt -1 target-test-full-mask horizon-blocked? }T -1 ==
+T{ 34 59 59 Alt 90 00 00 Az target-test-full-mask horizon-blocked? }T 0 ==
+T{ 70 00 01 Alt 90 00 00 Az target-test-full-mask horizon-blocked? }T 0 ==
 T{ 15 00 00 Az azimuth>longitude }T 01 00 00 RA ==
 T{ -15 00 00 Az azimuth>longitude }T 23 00 00 RA ==
 T{ 20 00 00 RA 50 00 00 Dec target-test-north region-inside? }T -1 ==

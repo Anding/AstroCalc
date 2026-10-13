@@ -33,6 +33,8 @@ include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_catalogs.f
 0 s" below" s" Below" sky-below below-equator
 02 00 00 RA -10 00 00 Dec 04 00 00 RA +10 00 00 Dec
     s" band" s" Band" sky-band test-band
+00 00 00 RA -10 00 00 Dec 24 00 00 RA +10 00 00 Dec
+    s" full" s" Full longitude band" sky-band test-full-band
 : invalid-band ( -- )
     0 1 0 -1 s" invalid" s" Invalid" sky-band
 ;
@@ -92,6 +94,10 @@ T{ 02 00 00 RA 1- 0 test-band region-inside? }T 0 ==
 T{ 04 00 00 RA 1+ 0 test-band region-inside? }T 0 ==
 T{ 03 00 00 RA -10 00 00 Dec 1- test-band region-inside? }T 0 ==
 T{ 03 00 00 RA +10 00 00 Dec 1+ test-band region-inside? }T 0 ==
+T{ 00 00 00 RA 0 test-full-band region-inside? }T -1 ==
+T{ 12 00 00 RA 0 test-full-band region-inside? }T -1 ==
+T{ 23 59 59 RA 0 test-full-band region-inside? }T -1 ==
+T{ 24 00 00 RA 0 test-full-band region-inside? }T -1 ==
 T{ ' invalid-band catch 0<> }T -1 ==
 T{ ' invalid-circle catch 0<> }T -1 ==
 T{ depth }T skyregions-test-depth ==
