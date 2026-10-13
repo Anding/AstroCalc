@@ -79,35 +79,12 @@ DOES> ( -- RA Dec ) target-coordinates ;
 1 constant meridian-east
 2 constant meridian-west
 meridian-indifferent value targets.meridian-side
-0 value targets.date
-0 value targets.lst
-0 value targets.latitude
-0 value targets.reference-RA
-0 value targets.reference-Dec
 -90 00 00 Alt value targets.minimum-altitude
 90 00 00 Alt value targets.maximum-altitude
 default-horizon-mask value targets.mask
 
-: target-context { date lst latitude -- }
-    date to targets.date
-    lst to targets.lst
-    latitude to targets.latitude
-;
-
-: target-reference { RA Dec -- }
-    RA to targets.reference-RA
-    Dec to targets.reference-Dec
-;
-
-: target-reference-altaz ( alt az -- )
-    targets.date 0= abort" AltAz reference needs a time and site context"
-    targets.latitude HZtoEQ-at
-    swap targets.lst swap - %clock swap
-    targets.date J2000 target-reference
-;
-
 : validate-target-query ( -- )
-    targets.date 0= abort" Target query needs a time and site context"
+    SkyDate 0= abort" Target query needs a UTC date"
     targets.minimum-altitude targets.maximum-altitude >
         abort" Inverted target altitude bounds"
     targets.meridian-side meridian-indifferent meridian-west 1+ within 0=
@@ -115,38 +92,38 @@ default-horizon-mask value targets.mask
 ;
 
 : target-visible? { target | RA Dec hour-angle altitude azimuth -- flag }
-    target target-coordinates targets.date JNOW to Dec to RA
-    RA targets.lst RAtoHA to hour-angle
+    target target-coordinates SkyDate JNOW to Dec to RA
+    RA LST RAtoHA to hour-angle
     targets.meridian-side meridian-east = if
         hour-angle 0< 0= if 0 exit then
     then
     targets.meridian-side meridian-west = if
         hour-angle 0< if 0 exit then
     then
-    hour-angle Dec targets.latitude EQtoHZ-at to azimuth to altitude
+    hour-angle Dec EQtoHZ to azimuth to altitude
     altitude targets.minimum-altitude >=
     altitude targets.maximum-altitude <= and
     altitude azimuth targets.mask horizon-blocked? 0= and
 ;
 
-: target-distance ( target -- distance )
-    target-coordinates targets.reference-RA targets.reference-Dec ang_sep
+: target-distance { target RA Dec -- distance }
+    target target-coordinates RA Dec ang_sep
 ;
 
 : next-target
-    { list previous | target best distance best-distance previous-distance seen -- target|0 }
+    { list previous RA Dec | target best distance best-distance previous-distance seen -- target|0 }
 \ Equal-distance successors follow source order. Only the previous address
 \ is retained; neither catalogue links nor FITS region links are rewritten.
     validate-target-query
     0 to best
     0 to best-distance
     0 to seen
-    previous if previous target-distance else -1 then to previous-distance
+    previous if previous RA Dec target-distance else -1 then to previous-distance
     list TARGETLIST.FIRST + @ to target
     begin target while
         target previous = if -1 to seen then
         target target-visible? if
-            target target-distance to distance
+            target RA Dec target-distance to distance
             distance previous-distance >
             distance previous-distance = seen and target previous <> and or if
                 best 0= distance best-distance < or if
@@ -160,12 +137,14 @@ default-horizon-mask value targets.mask
     best
 ;
 
-: nearest-target ( list -- target|0 ) 0 next-target ;
+: nearest-target { list RA Dec -- target|0 }
+    list 0 RA Dec next-target
+;
 
-: walk-targets { list action | target -- }
-    list nearest-target to target
+: walk-targets { list RA Dec action | target -- }
+    list RA Dec nearest-target to target
     begin target while
-        target action execute
-        list target next-target to target
+        target target RA Dec target-distance action execute
+        list target RA Dec next-target to target
     repeat
 ;

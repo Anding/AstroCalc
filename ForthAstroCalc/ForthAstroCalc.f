@@ -125,6 +125,8 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 0 0 0 ~ value DaylightSaving		\ hh min sec, expect 00 00 00 or 01 00 00
 48 51 53 ~ value Latitude			\ deg min sec, south is negative IN ALL THREE INTEGERS
 02 20 56 ~ value Longitude			\ deg min sec, west is negative IN ALL THREE INTEGERS
+0 value LST                         \ local sidereal time, in time seconds
+0 value SkyDate                     \ UTC calendar date, yyyy mm dd ~
 
 : UTtoGST ( yymmdd hhmmss - T)
 \ convert a UT date and time to GST   
@@ -199,6 +201,13 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 : JNOW ( RA_J2000 DEC_J2000 YYMMDD -- RA_JNOW DEC_JNOW) { | RA_JNOW DEC_JNOW -- }
     ADDR RA_JNOW ADDR DEC_JNOW
     J2000toJNOW ( --) RA_JNOW DEC_JNOW
+;
+
+: HZtoJ2000 ( alt az -- RA_J2000 DEC_J2000 )
+    SkyDate 0= abort" Horizon conversion needs a UTC date"
+    HZtoEQ
+    swap LST swap - %clock swap
+    SkyDate J2000
 ;
 
 : J2000toHZ { RA_J2000 DEC_J2000 YYMMDD LST lat -- alt az }
