@@ -30,6 +30,16 @@ END-SKY-POLYGON reversed-region
 
 include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_catalogs.f
 
+0 s" below" s" Below" sky-below below-equator
+02 00 00 RA -10 00 00 Dec 04 00 00 RA +10 00 00 Dec
+    s" band" s" Band" sky-band test-band
+: invalid-band ( -- )
+    0 1 0 -1 s" invalid" s" Invalid" sky-band
+;
+: invalid-circle ( -- )
+    0 0 -1 s" invalid" s" Invalid" sky-circle
+;
+
 Tstart
 
 T{ depth }T skyregions-test-depth ==
@@ -74,5 +84,16 @@ T{ deep-sky-regions regionlist-fits-key hashS }T s" REGDEEP" hashS ==
 T{ 12 27 00 RA +12 43 00 Dec deep-sky-regions search-regionlist }T virgo-galaxy-cluster ==
 T{ 20 30 00 RA +40 00 00 Dec deep-sky-regions search-regionlist }T cygnus-milky-way ==
 T{ 00 00 00 RA -60 00 00 Dec deep-sky-regions search-regionlist }T deep-sky-n-a ==
+T{ 12 00 00 RA -1 below-equator region-inside? }T -1 ==
+T{ 12 00 00 RA 0 below-equator region-inside? }T 0 ==
+T{ 02 00 00 RA -10 00 00 Dec test-band region-inside? }T -1 ==
+T{ 04 00 00 RA +10 00 00 Dec test-band region-inside? }T -1 ==
+T{ 02 00 00 RA 1- 0 test-band region-inside? }T 0 ==
+T{ 04 00 00 RA 1+ 0 test-band region-inside? }T 0 ==
+T{ 03 00 00 RA -10 00 00 Dec 1- test-band region-inside? }T 0 ==
+T{ 03 00 00 RA +10 00 00 Dec 1+ test-band region-inside? }T 0 ==
+T{ ' invalid-band catch 0<> }T -1 ==
+T{ ' invalid-circle catch 0<> }T -1 ==
+T{ depth }T skyregions-test-depth ==
 
 Tend

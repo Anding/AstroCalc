@@ -1,4 +1,6 @@
-\ Structured named regions of the J2000 sky
+\ Structured named spherical regions, independent of coordinate frame.
+\ Longitude uses time seconds; latitude and radius use angular arcseconds.
+\ RA/Dec parameter names are conventional, not a frame restriction.
 \
 \ Region and regionlist words return parameter-field addresses.  All region
 \ records share one header and dispatch through a stored predicate xt.  An
@@ -123,6 +125,20 @@ need AstroCalc
 	box-test
 ;
 
+: below-region-inside? { longitude latitude region -- flag }
+    latitude region REGION.DATA0 + @ <
+;
+
+: band-region-inside? { longitude latitude region | first last -- flag }
+\ Inclusive bounds; longitude may wrap through 00h.
+    latitude region REGION.DATA1 + @ >=
+    latitude region REGION.DATA3 + @ <= and 0= if 0 exit then
+    region REGION.DATA0 + @ to first
+    region REGION.DATA2 + @ to last
+    longitude first >= longitude last <=
+    first last > if or else and then
+;
+
 : default-region-inside? ( RA Dec region -- flag )
 \ The final region in every list supplies total classification.
 	drop 2drop -1
@@ -140,6 +156,7 @@ need AstroCalc
 : sky-circle
 	{ center-RA center-Dec radius id-addr id-u label-addr label-u -- }
 \ Define a word returning a circle region record.
+	radius 0< abort" Negative region radius"
 	create
 	['] circle-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -165,6 +182,29 @@ DOES> ( -- region )
 	R> append-region
 DOES> ( -- region )
 ;
+
+: sky-below { latitude id-addr id-u label-addr label-u -- }
+    create
+    ['] below-region-inside?
+    id-addr id-u label-addr label-u compile-region-header
+    >R
+    latitude R@ REGION.DATA0 + !
+    R> append-region
+DOES> ( -- region ) ;
+
+: sky-band
+    { longitude1 latitude1 longitude2 latitude2 id-addr id-u label-addr label-u -- }
+    latitude1 latitude2 > abort" Inverted region latitude bounds"
+    create
+    ['] band-region-inside?
+    id-addr id-u label-addr label-u compile-region-header
+    >R
+    longitude1 R@ REGION.DATA0 + !
+    latitude1 R@ REGION.DATA1 + !
+    longitude2 R@ REGION.DATA2 + !
+    latitude2 R@ REGION.DATA3 + !
+    R> append-region
+DOES> ( -- region ) ;
 
 : sky-default
 	{ id-addr id-u label-addr label-u -- }

@@ -1,6 +1,8 @@
 # SkyRegions user and maintainer guide
 
-`SkyRegions.f` gives names to areas of the J2000 sky. A coordinate can be
+`SkyRegions.f` gives names to spherical areas independently of coordinate
+frame. The caller supplies consistent longitude/latitude coordinates; there
+is no equatorial/horizon switch. A coordinate can be
 searched independently in several ordered `regionlist`s: one list may identify
 an imaging target, another an atlas chart, and another a visually recognizable
 part of the sky.
@@ -30,16 +32,21 @@ an additional list:
 
 ```forth
 NEED AstroImagingTargets
-include regions\VisualSky.f
+include sky\VisualSky.f
 ```
 
 Inclusion is activation. `END-REGIONLIST` automatically adds the completed
 list to the session registry; there is no enable switch or search order.
 
-## Coordinates and negative declinations
+## Coordinates, units and negative latitudes
 
-All coordinates are J2000. `RA` and `Dec` convert three integers into the
-single-cell finite-fraction forms used by AstroCalc:
+Longitude is in integer time seconds (hh mm ss), latitude in angular
+arcseconds (degrees, minutes, seconds). Equatorial catalogues conventionally
+use J2000 RA/Dec. Horizon catalogues use azimuth converted at their boundary:
+15 degrees = 1 hour, or angular arcseconds divided by 15. The `HorizonMasks`
+word `azimuth>longitude` normalises and performs this conversion.
+The caller, not a region flag, owns the frame and epoch.
+`RA` and `Dec` convert three integers into the single-cell forms:
 
 ```forth
 05 35 16 RA
@@ -170,6 +177,22 @@ For example, `23h` to `01h` covers the two-hour interval around `00h`.
 A strip follows lines of constant RA and declination. It is not a spherical
 polygon.
 
+### Below a latitude and inclusive bands
+
+```forth
+0 s" ground" s" Ground" sky-below ground
+20 00 00 RA -90 00 00 Dec 04 00 00 RA +90 00 00 Dec
+    s" north" s" Northern band" sky-band north
+```
+
+`sky-below ( latitude id-addr id-u label-addr label-u "name" -- )`
+matches strictly below the supplied latitude at any longitude.
+`sky-band ( longitude1 latitude1 longitude2 latitude2 id-addr id-u
+label-addr label-u "name" -- )` includes both latitude and longitude
+boundaries; longitude1 > longitude2 wraps through 00h. Inverted latitude
+bounds are rejected. These predicates work unchanged in either frame.
+They are useful in nonregistered obstruction lists as well as classifications.
+
 ### Convex spherical polygon
 
 ```forth
@@ -240,11 +263,12 @@ answer for the same coordinate.
 ## AstroImagingInForth integration
 
 AstroImagingInForth loads `fits-target-regions` by default. Its generated
-Messier definitions provide pure coordinate words:
+Messier definitions provide side-effect-free target references:
 
 ```forth
-M42       ( -- RA Dec )
-M42 goto
+M42                     ( -- target )
+M42 target-coordinates  ( -- RA Dec )
+M42 goto-target
 ```
 
 Evaluating a target word changes no target-name state. At exposure time the
@@ -280,7 +304,7 @@ Keep mechanism and catalogues separate. A catalogue file should:
 Prefer explicit values in generated Forth:
 
 ```forth
-M42 00 05 00 DEGMMSS
+M42 target-coordinates 00 05 00 DEGMMSS
     s" M42" s" M42" sky-circle M42-region
 ```
 

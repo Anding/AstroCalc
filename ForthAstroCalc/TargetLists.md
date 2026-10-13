@@ -8,18 +8,25 @@ are independent. Queries allocate no result arrays and never rewrite links.
 
 ```forth
 BEGIN-TARGETLIST my-targets
-05 35 16 RA -05 -23 -23 Dec POINT-TARGET: Orion
+05 35 16 RA -05 -23 -23 Dec magnitude-unknown POINT-TARGET: M42
 END-TARGETLIST
 
-Orion                         \ -- RA Dec
-' Orion >body                 \ -- target address
+M42                           \ -- target
+M42 target-coordinates        \ -- RA Dec
+M42 target-magnitude          \ -- millimagnitudes
 ```
 
-`FOCUS-TARGET:` additionally consumes three strings: source ID, magnitude
-and colour, before parsing the word name. `target-name`, `target-source`,
-`target-magnitude` and `target-colour` return the stored strings.
-`target-coordinates ( target -- RA Dec )` reads the same coordinates returned
-by the named word. `each-target ( list xt -- )` visits every record in source
+`POINT-TARGET: ( RA Dec millimagnitudes "name" -- )` creates a target whose
+only astronomical data are its catalogue name, J2000 equatorial coordinates
+and magnitude. The name is the parsed dictionary name, not a popular label.
+There are no separate source IDs, colours, notes or stored regions.
+`target-name ( target -- caddr u )` returns the name.
+Magnitude is an integer in thousandths: `4199` means 4.199;
+negative and zero magnitudes are valid. `magnitude-unknown` is the explicit
+unknown sentinel (-2147483647). `.magnitude` prints three decimals or `unknown`.
+Each catalogue documents its magnitude band; different bands are not directly
+interchangeable. `target-coordinates ( target -- RA Dec )` extracts position.
+`each-target ( list xt -- )` visits every record in source
 order, passing its address to `( target -- )`. Each record belongs to one
 catalogue; do not append an existing record to another list. Subsets are
 selected by the walk rather than constructed by relinking catalogue records.
@@ -57,9 +64,9 @@ obstruction mask rejects `Alt < 0`; there is no extra hidden horizon test.
 Invalid side values, inverted bounds and a missing UTC date raise errors.
 
 ```forth
-my-targets Orion nearest-target     \ -- target|0
-my-targets previous Orion next-target
-my-targets Orion ' show-target walk-targets
+my-targets M42 target-coordinates nearest-target     \ -- target|0
+my-targets previous M42 target-coordinates next-target
+my-targets M42 target-coordinates ' show-target walk-targets
 ```
 
 `nearest-target ( list RA Dec -- target|0 )` starts a selection.
@@ -82,26 +89,42 @@ a new live query; AIF's `skynow` is the equipment bridge, not this library.
 
 ```forth
 BEGIN-HORIZON-MASK observatory-mask
-0 horizon-below ground
-0 45 00 00 Alt 300 00 00 Az 60 00 00 Az
-    horizon-strip northern-building
-50 00 00 Alt 180 00 00 Az 5 00 00 DEGMMSS
-    horizon-circle small-obstruction
+0 s" ground" s" Ground" sky-below ground
+300 00 00 Az azimuth>longitude 0
+60 00 00 Az azimuth>longitude 45 00 00 Alt
+    s" building" s" Northern building" sky-band northern-building
+180 00 00 Az azimuth>longitude 50 00 00 Alt 5 00 00 DEGMMSS
+    s" small" s" Small obstruction" sky-circle small-obstruction
 END-HORIZON-MASK
 observatory-mask -> targets.mask
 ```
 
 Masks are unions of blocked regions, searched by the existing region
 predicate/traversal mechanism. They do not need an unconditional final region:
-no match means clear. `horizon-below` is strictly below its altitude;
-strips and circles include their boundaries. A strip's azimuth sector may
-cross north. Query azimuths are normalised across 0/360 degrees.
+no match means clear. These are ordinary coordinate-agnostic `SkyRegions`
+geometries: `sky-below` is strictly below its latitude, while `sky-band`
+and circles include boundaries. A band's longitude interval may cross 00h.
+`sky-strip` remains half-open for catalogue classification.
 
 `horizon-blocked? ( alt az mask -- flag )` does not search equatorial FITS
-regions. Horizon predicates explicitly interpret Alt/Az; circle longitude
-uses AstroCalc's integer time-second resolution (15 azimuth arcseconds).
+regions. It converts azimuth at the boundary using
+`azimuth>longitude ( azimuth -- longitude )`: normalise to [0,360), then
+divide angular arcseconds by 15 to obtain integer time seconds (15 degrees
+= 1 hour). All region longitude coordinates use this time-angle unit, and
+latitude/radius use angular units. The same conversion is explicit when
+declaring horizon regions. Longitude resolution is 15 azimuth arcseconds;
+queries truncate to the lower time second, including at mask edges.
+The caller owns frame consistency; regions contain no frame switch.
 Masks are never registered as FITS classifications. Zero disables mask
 testing for callers deliberately requesting an unrestricted calculation.
 
 Selection neither slews nor guarantees that a slew path is safe. Refresh
 context and recheck the selected coordinate before issuing equipment commands.
+
+Targets and regions remain independent records. A target-centred region is
+an explicit position-plus-radius construction, not a field of the target:
+
+```forth
+M42 target-coordinates 00 05 00 DEGMMSS
+    s" M42" s" M42" sky-circle M42-region
+```

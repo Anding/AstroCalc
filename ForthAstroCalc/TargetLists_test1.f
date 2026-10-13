@@ -5,14 +5,14 @@ depth constant target-test-depth
 first-regionlist constant target-test-registry
 
 BEGIN-TARGETLIST target-test-list
-12 00 00 RA 0 POINT-TARGET: target-test-far
-06 00 00 RA 0 POINT-TARGET: target-test-near-a
-08 00 00 RA 0 POINT-TARGET: target-test-middle
-06 00 00 RA 0 POINT-TARGET: target-test-near-b
+12 00 00 RA 0 magnitude-unknown POINT-TARGET: target-test-far
+06 00 00 RA 0 -1460 POINT-TARGET: target-test-near-a
+08 00 00 RA 0 0 POINT-TARGET: target-test-middle
+06 00 00 RA 0 4199 POINT-TARGET: target-test-near-b
 END-TARGETLIST
 BEGIN-TARGETLIST target-test-empty
 END-TARGETLIST
-00 00 00 RA 0 POINT-TARGET: target-test-outsider
+00 00 00 RA 0 magnitude-unknown POINT-TARGET: target-test-outsider
 
 ' target-test-far >body constant target-test-far-record
 ' target-test-near-a >body constant target-test-a-record
@@ -20,13 +20,14 @@ END-TARGETLIST
 ' target-test-middle >body constant target-test-middle-record
 
 BEGIN-HORIZON-MASK target-test-mask
-0 horizon-below target-test-below
-35 00 00 Alt 70 00 00 Alt 300 00 00 Az 60 00 00 Az
-    horizon-strip target-test-north
+0 s" below" s" Below" sky-below target-test-below
+300 00 00 Az azimuth>longitude 35 00 00 Alt
+60 00 00 Az azimuth>longitude 70 00 00 Alt
+    s" north" s" North" sky-band target-test-north
 END-HORIZON-MASK
 BEGIN-HORIZON-MASK target-test-circle-mask
-45 00 00 Alt 359 00 00 Az 5 00 00 DEGMMSS
-    horizon-circle target-test-circle
+359 00 00 Az azimuth>longitude 45 00 00 Alt 5 00 00 DEGMMSS
+    s" circle" s" Circle" sky-circle target-test-circle
 END-HORIZON-MASK
 
 2000 01 01 ~ -> SkyDate
@@ -44,7 +45,12 @@ END-HORIZON-MASK
 Tstart
 T{ depth }T target-test-depth ==
 T{ first-regionlist }T target-test-registry ==
-T{ target-test-near-a }T 06 00 00 RA 0 ==
+T{ target-test-near-a }T target-test-a-record ==
+T{ target-test-near-a target-coordinates }T 06 00 00 RA 0 ==
+T{ target-test-near-a target-magnitude }T -1460 ==
+T{ target-test-middle target-magnitude }T 0 ==
+T{ target-test-near-b target-magnitude }T 4199 ==
+T{ target-test-far target-magnitude }T magnitude-unknown ==
 T{ target-test-a-record target-name hashS }T s" target-test-near-a" hashS ==
 T{ target-test-a-record 06 00 00 RA 0 target-distance }T 0 ==
 T{ target-test-list 06 00 00 RA 0 nearest-target }T target-test-a-record ==
@@ -93,6 +99,12 @@ T{ 71 00 00 Alt 0 target-test-mask horizon-blocked? }T 0 ==
 T{ 50 00 00 Alt 360 00 00 Az target-test-mask horizon-blocked? }T -1 ==
 T{ 45 00 00 Alt 1 00 00 Az target-test-circle-mask horizon-blocked? }T -1 ==
 T{ 45 00 00 Alt 180 00 00 Az target-test-circle-mask horizon-blocked? }T 0 ==
+T{ 15 00 00 Az azimuth>longitude }T 01 00 00 RA ==
+T{ -15 00 00 Az azimuth>longitude }T 23 00 00 RA ==
+T{ 20 00 00 RA 50 00 00 Dec target-test-north region-inside? }T -1 ==
+T{ 00 04 00 RA 45 00 00 Dec target-test-circle region-inside? }T -1 ==
+T{ 00 04 00 RA 45 00 00 Dec target-test-circle-mask search-regionlist }T target-test-circle ==
+T{ -1460 .magnitude 0 .magnitude 4199 .magnitude magnitude-unknown .magnitude }T ==
 
 T{ target-test-a-record
     target-test-a-record target-coordinates SkyDate LST Latitude J2000toHZ

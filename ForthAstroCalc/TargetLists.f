@@ -6,10 +6,9 @@ NEED HorizonMasks
 1 cells constant TARGET.RA
 2 cells constant TARGET.DEC
 3 cells constant TARGET.NAME
-4 cells constant TARGET.SOURCE
-5 cells constant TARGET.MAGNITUDE
-6 cells constant TARGET.COLOUR
-7 cells constant /TARGET
+4 cells constant TARGET.MAGNITUDE
+5 cells constant /TARGET
+-2147483647 constant magnitude-unknown
 0 cells constant TARGETLIST.FIRST
 1 cells constant TARGETLIST.LAST
 2 cells constant /TARGETLIST
@@ -36,17 +35,14 @@ DOES> ( -- list )
 ;
 
 : define-target
-    { RA Dec source-addr source-u mag-addr mag-u colour-addr colour-u |
+    { RA Dec magnitude |
       name-addr name-u target -- target }
     BL parse-word to name-u to name-addr
     name-u 0= abort" Target name must not be empty"
     name-addr name-u ($create)
     here to target
-    0 , RA , Dec , 0 , 0 , 0 , 0 ,
+    0 , RA , Dec , 0 , magnitude ,
     name-addr name-u target TARGET.NAME + store-region-string
-    source-addr source-u target TARGET.SOURCE + store-region-string
-    mag-addr mag-u target TARGET.MAGNITUDE + store-region-string
-    colour-addr colour-u target TARGET.COLOUR + store-region-string
     target append-target
     target
 ;
@@ -55,17 +51,17 @@ DOES> ( -- list )
     dup TARGET.RA + @ swap TARGET.DEC + @
 ;
 : target-name ( target -- caddr u ) TARGET.NAME + @ count ;
-: target-source ( target -- caddr u ) TARGET.SOURCE + @ count ;
-: target-magnitude ( target -- caddr u ) TARGET.MAGNITUDE + @ count ;
-: target-colour ( target -- caddr u ) TARGET.COLOUR + @ count ;
+: target-magnitude ( target -- millimagnitudes ) TARGET.MAGNITUDE + @ ;
 
-: POINT-TARGET: { RA Dec -- }
-    RA Dec s" " s" " s" " define-target drop
-DOES> ( -- RA Dec ) target-coordinates ;
+: .magnitude ( millimagnitudes -- )
+    dup magnitude-unknown = if drop s" unknown" type exit then
+    dup 0< if '-' emit then
+    abs 0 <# # # # '.' hold #s #> type
+;
 
-: FOCUS-TARGET: ( RA Dec source-addr source-u mag-addr mag-u colour-addr colour-u "name" -- )
+: POINT-TARGET: ( RA Dec millimagnitudes "name" -- )
     define-target drop
-DOES> ( -- RA Dec ) target-coordinates ;
+DOES> ( -- target ) ;
 
 : each-target { list action | target -- }
     list TARGETLIST.FIRST + @ to target
