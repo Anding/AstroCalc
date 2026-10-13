@@ -4,3 +4,7 @@ Astronomical calculations in C and Forth for telescope control, based on Duffett
 See [`ForthAstroCalc/SkyRegions.md`](ForthAstroCalc/SkyRegions.md) for the
 user and maintainer guide to named sky regions and automatically active
 regionlists.
+
+See [`ForthAstroCalc/TargetLists.md`](ForthAstroCalc/TargetLists.md) for
+buffer-free target selection, meridian-side filtering and independent Alt/Az
+obstruction masks.

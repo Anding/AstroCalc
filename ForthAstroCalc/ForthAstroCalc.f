@@ -182,9 +182,13 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 	latitude EQtoHZ-at
 ;
 
-: HZtoEQ ( alt az -- H dec) { | H dec -- }
-	latitude ADDR H ADDR dec				\ use VFX locals for the pass-by-reference
+: HZtoEQ-at ( alt az lat -- H dec) { | H dec -- }
+	ADDR H ADDR dec				\ use VFX locals for the pass-by-reference
 	( alt az lat &H &dec) HZtoEQ_ext ( --) H dec
+;
+
+: HZtoEQ ( alt az -- H dec)
+	latitude HZtoEQ-at
 ;
 
 : J2000 ( RA_JNOW DEC_JNOW YYMMDD -- RA_J2000 DEC_J2000) { | RA_J2000 DEC_J2000 -- }
