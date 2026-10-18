@@ -10,8 +10,8 @@ Documentation for these small Forth modules lives with the code:
   [`TargetLists_test.f`](ForthAstroCalc/TargetLists_test.f) is an executable user
   tutorial for catalogue declarations, ranked walks, query policy and horizon masks.
 
-Each tutorial contains commented examples, `simple-tester` assertions and
-PowerShell commands to run it. The existing `*_test1.f` files retain the wider
+Each tutorial contains commented examples and `simple-tester` assertions.
+The existing `*_test1.f` files retain the wider
 regression checks. Successful execution ends with `REGRESSION PASSED`.
 
 Use the current Win32 build of `AstroCalc.dll` alongside the 32-bit Forth
