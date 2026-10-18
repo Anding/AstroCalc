@@ -5,14 +5,14 @@ depth constant target-test-depth
 first-regionlist constant target-test-registry
 
 BEGIN-TARGETLIST target-test-list
-12 00 00 RA 0 magnitude-unknown POINT-TARGET: target-test-far
-06 00 00 RA 0 -1460 POINT-TARGET: target-test-near-a
-08 00 00 RA 0 0 POINT-TARGET: target-test-middle
-06 00 00 RA 0 4199 POINT-TARGET: target-test-near-b
+12 00 00 RA 0 magnitude-unknown TARGET: target-test-far
+06 00 00 RA 0 -1460 TARGET: target-test-near-a
+08 00 00 RA 0 0 TARGET: target-test-middle
+06 00 00 RA 0 4199 TARGET: target-test-near-b
 END-TARGETLIST
 BEGIN-TARGETLIST target-test-empty
 END-TARGETLIST
-00 00 00 RA 0 magnitude-unknown POINT-TARGET: target-test-outsider
+00 00 00 RA 0 magnitude-unknown TARGET: target-test-outsider
 
 ' target-test-far >body constant target-test-far-record
 ' target-test-near-a >body constant target-test-a-record

@@ -44,7 +44,7 @@ NEED HorizonMasks
 
 : BEGIN-TARGETLIST ( "name" -- )
 \ Define a word ( -- list ) and open an empty dictionary-resident catalogue.
-\ Subsequent POINT-TARGET: declarations append in source order until
+\ Subsequent TARGET: declarations append in source order until
 \ END-TARGETLIST.  Empty lists are valid; nested declarations are not.
 \ Unlike regionlists, target lists have no global registry or final default.
     active-targetlist abort" Nested target list"
@@ -102,7 +102,7 @@ DOES> ( -- list )
     abs 0 <# # # # '.' hold #s #> type
 ;
 
-: POINT-TARGET: ( RA Dec millimagnitudes "name" -- )
+: TARGET: ( RA Dec millimagnitudes "name" -- )
 \ Define a named J2000 point; executing name returns ( -- target ).
 \ The parsed dictionary name is also its stored catalogue name.  No popular
 \ label, region radius or visibility state is stored.  May be used outside

@@ -25,10 +25,10 @@ Tstart
 \ mixing different photometric bands.  To add sourced magnitudes, supply
 \ integer millimagnitudes (4199 means 4.199) and document the passband.
 BEGIN-TARGETLIST winter-targets
-05 34 32 RA +22 00 52 Dec magnitude-unknown POINT-TARGET: M1
-05 35 16 RA -05 -23 -23 Dec magnitude-unknown POINT-TARGET: M42
-05 35 31 RA -05 -16 -03 Dec magnitude-unknown POINT-TARGET: M43
-03 47 29 RA +24 06 19 Dec magnitude-unknown POINT-TARGET: M45
+05 34 32 RA +22 00 52 Dec magnitude-unknown TARGET: M1
+05 35 16 RA -05 -23 -23 Dec magnitude-unknown TARGET: M42
+05 35 31 RA -05 -16 -03 Dec magnitude-unknown TARGET: M43
+03 47 29 RA +24 06 19 Dec magnitude-unknown TARGET: M45
 END-TARGETLIST
 
 \ Each name returns a target reference, not coordinates and not a command
