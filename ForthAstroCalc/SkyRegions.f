@@ -23,23 +23,44 @@
 \ copied.  Use region-inside? for a direct test, or search-regionlist for
 \ first-match classification.  Source order, not size or proximity, wins.
 \
-\ Example declaration and query:
-\   s" Familiar sky" s" REGVIS" BEGIN-REGIONLIST familiar-regions
-\   03 47 29 RA 24 06 19 Dec 03 00 00 DEGMMSS
-\       s" pleiades" s" Pleiades neighbourhood" sky-circle pleiades-area
-\   s" n-a" s" n/a" sky-default familiar-n-a
-\   END-REGIONLIST
-\   03 47 29 RA 24 06 19 Dec familiar-regions search-regionlist region-label
+\ SkyRegions_test.f is the executable user tutorial: declarations, geometry
+\ boundaries, first-match priority, independent lists and registry traversal.
+\ SkyRegions_test1.f retains the wider catalogue and geometry regressions.
 \
 \ Lists and records live in the dictionary; queries allocate nothing.
 \ Include a catalogue once: completing a list registers it automatically.
 \ Do not redefine its words expecting old records to be removed.
+\
+\ CATALOGUES AND IMAGING
+\ Keep catalogue data separate from this mechanism.  Begin a catalogue with
+\ NEED SkyRegions and document its coordinate source and epoch.  Declare
+\ specific regions in deliberate priority order and finish with one default.
+\ Generated catalogues should identify their source version and generator;
+\ change the generator rather than editing its output independently.
+\ A target-association circle's radius is a matching tolerance, not
+\ necessarily the object's physical extent.  AIF's Messier generator uses
+\ an explicit five-arcminute radius, adjustable per entry.
+\
+\ AstroImagingInForth's AstroImagingTargets capability loads the default
+\ fits-target-regions list.  At exposure time the pipeline uses the captured
+\ mount J2000 coordinate to search this list for OBJECT, then searches every
+\ registered list independently and records its FITS key and matched ID
+\ under #REGION.  REGTARG deliberately repeats the primary target lookup.
+\ Optional lists need only be included; no pipeline modification is needed.
+\ Evaluating M42 returns a target reference without changing metadata state.
+\ M42 goto-target is AIF's separate equipment operation, not part of this
+\ library.  Standalone regions are not automatically searched for metadata.
 
 need AstroCalc
 
 \ Common dictionary-resident region record.  NEXT gives a region single-list
 \ membership: do not append the same record to two lists.  PREDICATE provides
 \ geometry dispatch; defining words own DATA0..DATA3 and must document them.
+\ ID and LABEL point to counted strings.  To add a geometry, implement
+\ ( longitude latitude region -- flag ), CREATE a word, compile this header
+\ with its predicate xt, fill DATA cells, append-region, and use an empty
+\ DOES> so the created word returns its record.  If four data cells are
+\ insufficient, store a pointer to a separate dictionary descriptor.
 0 cells constant REGION.NEXT
 1 cells constant REGION.PREDICATE
 2 cells constant REGION.ID

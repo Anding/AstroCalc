@@ -10,21 +10,14 @@
 \ 4.199.  Use magnitude-unknown, not zero, when no magnitude is known.
 \ The catalogue must state its magnitude band; selection does not use it.
 \
-\   BEGIN-TARGETLIST my-targets
-\   05 35 16 RA -05 -23 -23 Dec magnitude-unknown POINT-TARGET: M42
-\   END-TARGETLIST
-\   M42 target-coordinates                 \ -- RA Dec
-\   M42 target-name                        \ -- caddr u
+\ TargetLists_test.f is the executable user tutorial: catalogue declarations,
+\ ranked walks, scoped policy, sky snapshots and Alt/Az obstruction masks.
+\ TargetLists_test1.f retains the more exhaustive selection regressions.
 \
 \ Before querying, supply a coherent snapshot: SkyDate (UTC yyyy mm dd ~),
 \ LST (local sidereal time) and Latitude.  This library does not read a clock
 \ or derive LST from Longitude.  Ranking coordinates on the stack are J2000;
 \ use HZtoJ2000 to convert an Alt/Az reference with the same sky snapshot.
-\   2026 10 13 ~ -> SkyDate
-\   06 00 00 RA -> LST
-\   22 18 00 DEGMMSS -> Latitude
-\   35 00 00 Alt -> targets.minimum-altitude
-\   my-targets M42 target-coordinates nearest-target  \ -- target|0
 \
 \ Set targets.maximum-altitude, targets.meridian-side and targets.mask
 \ explicitly when required.  Defaults allow -90..+90 degrees, either side
@@ -32,6 +25,9 @@
 \ zero to targets.mask disables obstruction testing, not altitude bounds.
 \ Masks are Alt/Az blocked regions, independent of equatorial FITS lists.
 \ Selection is not slew-path validation: refresh and recheck before motion.
+\ In AstroImagingInForth, skynow refreshes the equipment-derived context;
+\ .targets and nearest-focus-star use with-meridian-side for scoped policy.
+\ A permanent policy change requires an explicit assignment to the value.
 NEED HorizonMasks
 
 0 cells constant TARGET.NEXT
