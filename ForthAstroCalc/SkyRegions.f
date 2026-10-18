@@ -6,6 +6,34 @@
 \ records share one header and dispatch through a stored predicate xt.  An
 \ open regionlist collects regions in source order; END-REGIONLIST then links
 \ the completed list into the global list consulted by imaging metadata.
+\
+\ USER NOTES
+\ Load with NEED SkyRegions; this defines mechanisms, not catalogues.
+\ The caller owns the frame and epoch: use consistent coordinates for both
+\ declarations and queries.  No precession or frame conversion occurs here.
+\ Equatorial lists normally use J2000.  For horizon regions convert azimuth
+\ with HorizonMasks' azimuth>longitude; latitude is then altitude.
+\ RA, Dec and DEGMMSS build single-cell values from three integers.
+\ Every nonzero component of a negative angle must be negative:
+\ -05 -23 -23 Dec is -5 degrees 23 minutes 23 seconds.
+\
+\ Each geometry defining word parses the following Forth name and creates
+\ a word with runtime effect ( -- region ), not a boolean test.  Its two
+\ strings are a stable metadata ID and a human-readable label; both are
+\ copied.  Use region-inside? for a direct test, or search-regionlist for
+\ first-match classification.  Source order, not size or proximity, wins.
+\
+\ Example declaration and query:
+\   s" Familiar sky" s" REGVIS" BEGIN-REGIONLIST familiar-regions
+\   03 47 29 RA 24 06 19 Dec 03 00 00 DEGMMSS
+\       s" pleiades" s" Pleiades neighbourhood" sky-circle pleiades-area
+\   s" n-a" s" n/a" sky-default familiar-n-a
+\   END-REGIONLIST
+\   03 47 29 RA 24 06 19 Dec familiar-regions search-regionlist region-label
+\
+\ Lists and records live in the dictionary; queries allocate nothing.
+\ Include a catalogue once: completing a list registers it automatically.
+\ Do not redefine its words expecting old records to be removed.
 
 need AstroCalc
 
@@ -126,11 +154,13 @@ need AstroCalc
 ;
 
 : below-region-inside? { longitude latitude region -- flag }
+\ DATA0=latitude ceiling.  Longitude is ignored; the boundary is excluded.
     latitude region REGION.DATA0 + @ <
 ;
 
 : band-region-inside? { longitude latitude region | first last -- flag }
 \ Inclusive bounds; longitude may wrap through 00h.
+\ DATA0..DATA3 contain longitude1, latitude1, longitude2, latitude2.
     latitude region REGION.DATA1 + @ >=
     latitude region REGION.DATA3 + @ <= and 0= if 0 exit then
     region REGION.DATA0 + @ to first
@@ -146,7 +176,11 @@ need AstroCalc
 
 : polygon-region-inside? { RA Dec region -- flag }
 \ DATA0 points to packed RA/Dec cells and DATA1 is the vertex count.
-\ The C function performs the numerical great-circle half-space tests.
+\ C converts the query and vertices to 3-D unit vectors.  Each adjacent
+\ vertex pair, including last-to-first, gives an edge normal by cross product.
+\ Dot products with the query must have consistent signs; near-zero products
+\ count as boundary hits.  Either winding works and 00h needs no special case.
+\ Degenerate edges are rejected.  This is O(vertices), not a planar ray cast.
 	RA Dec
 	region REGION.DATA0 + @
 	region REGION.DATA1 + @
@@ -154,11 +188,15 @@ need AstroCalc
 ;
 
 : check-circle-radius ( radius -- )
+\ Validate before CREATE so a negative radius does not leave a named record.
 	0< abort" Negative region radius"
 ;
 
 : compile-circle-region
 	{ center-RA center-Dec radius id-addr id-u label-addr label-u | region -- region }
+\ Shared record compiler for circle-based defining words.  The caller must
+\ validate radius before CREATE, then append the returned record as required.
+\ DATA3 remains unused; geometry and strings have dictionary lifetime.
 	['] circle-region-inside?
 	id-addr id-u label-addr label-u compile-region-header to region
 	center-RA region REGION.DATA0 + !
@@ -169,6 +207,10 @@ need AstroCalc
 
 : sky-circle
 	{ center-RA center-Dec radius id-addr id-u label-addr label-u -- }
+\ Define ( ... "name" -- ): a spherical cap centred on the supplied position.
+\ Radius is angular arcseconds, not longitude time seconds.  A point matches
+\ when ang_sep <= radius, including the circumference; zero radius is valid.
+\ Append to the open list, or leave a standalone region if no list is open.
 	radius check-circle-radius
 	create
 	center-RA center-Dec radius id-addr id-u label-addr label-u
@@ -179,6 +221,11 @@ DOES> ( -- region )
 : sky-strip
 	{ RA1 Dec1 RA2 Dec2 id-addr id-u label-addr label-u -- }
 \ Define a word returning a half-open RA/Dec strip record.
+\ Defining syntax: RA1 Dec1 RA2 Dec2 s" id" s" label" sky-strip name
+\ Bounds are [Dec1,Dec2) and [RA1,RA2); RA1>RA2 wraps through 00h.
+\ Equal RA bounds match nothing.  Use 00h and 24h for all longitudes.
+\ Supply ordered latitude bounds; this word does not validate them.
+\ Edges follow coordinate lines, unlike polygon great-circle edges.
 	create
 	['] strip-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -192,6 +239,9 @@ DOES> ( -- region )
 ;
 
 : sky-below { latitude id-addr id-u label-addr label-u -- }
+\ Define ( latitude s" id" s" label" "name" -- ) for all longitudes
+\ strictly below latitude.  Useful for ground or other latitude cutoffs;
+\ a point exactly on the cutoff is not inside.  DATA0 stores the cutoff.
     create
     ['] below-region-inside?
     id-addr id-u label-addr label-u compile-region-header
@@ -202,6 +252,11 @@ DOES> ( -- region ) ;
 
 : sky-band
     { longitude1 latitude1 longitude2 latitude2 id-addr id-u label-addr label-u -- }
+\ Define ( ... "name" -- ): a coordinate band including all four boundaries.
+\ Longitude1>longitude2 wraps through 00h; equal endpoints select one
+\ meridian, not the full circle.  Use explicit 00h and 24h bounds for that.
+\ Do not normalise the 24h endpoint as a position: it would become 00h.
+\ Latitude1 must be <= latitude2.  DATA0..DATA3 store the four bounds.
     latitude1 latitude2 > abort" Inverted region latitude bounds"
     create
     ['] band-region-inside?
@@ -217,6 +272,9 @@ DOES> ( -- region ) ;
 : sky-default
 	{ id-addr id-u label-addr label-u -- }
 \ Define an unconditional region, normally the last declaration in a list.
+\ Defining syntax: s" id" s" label" sky-default name
+\ This supplies an explicit fallback label/ID, not a missing-value sentinel.
+\ Put it only at the end: any later regions would be unreachable by search.
 	create
 	['] default-region-inside?
 	id-addr id-u label-addr label-u compile-region-header
@@ -227,6 +285,9 @@ DOES> ( -- region )
 : BEGIN-SKY-POLYGON ( -- )
 \ Remember where the packed vertex array begins in the dictionary.  Vertices
 \ are compiled before the region record, which later points back to this array.
+\ Begin a non-nestable declaration, completed by END-SKY-POLYGON name.
+\ Compile only SKY-VERTEX pairs in between; unrelated dictionary allocations
+\ would break the packed array.  Do not repeat the first vertex at the end.
 	sky-polygon-building abort" Nested sky polygon"
 	here to sky-polygon-start
 	0 to sky-polygon-count
@@ -247,6 +308,12 @@ DOES> ( -- region )
 \ Convexity and winding are numerical concerns; only cardinality is checked
 \ while compiling the catalogue.  DATA0 owns the stable dictionary address;
 \ DATA1 is the vertex count passed unchanged to the C predicate.
+\ Defining syntax: s" id" s" label" END-SKY-POLYGON name
+\ Supply at least three ordered vertices of a convex polygon smaller than
+\ a hemisphere, with no duplicate adjacent or antipodal adjacent vertices.
+\ The caller must ensure this geometry; declaration checks only vertex count.
+\ Edges are great-circle arcs, not constant-latitude segments.  Boundary
+\ points are included.  Use several convex regions for a concave outline.
 	sky-polygon-building 0= abort" END-SKY-POLYGON without BEGIN-SKY-POLYGON"
 	sky-polygon-count 3 < if
 		0 to sky-polygon-building
@@ -269,6 +336,10 @@ DOES> ( -- region )
 \ The CREATE body is the list's public identity.  The completed list becomes
 \ active automatically at END-REGIONLIST, never at BEGIN, so an incomplete
 \ declaration cannot be searched through the session registry.
+\ Defining syntax: s" display name" s" FITSKEY" BEGIN-REGIONLIST name
+\ The created name returns ( -- regionlist ); regions declared until
+\ END-REGIONLIST append here in source order.  Lists cannot be nested.
+\ Display name must be nonempty; FITS key length must be 1..8 characters.
 	active-regionlist abort" Nested regionlist"
 	name-u 0= abort" Regionlist name must not be empty"
 	fits-u 0= fits-u 8 > or abort" FITS name must contain 1..8 characters"
@@ -285,6 +356,8 @@ DOES> ( -- regionlist )
 \ Close, validate, and activate the list in inclusion order.  Catalogue files
 \ need no registration word: if a regionlist is included, it is used.  Linking
 \ only here also guarantees registered lists are non-empty and end in default.
+\ The last predicate is checked, but earlier defaults are not rejected:
+\ keep exactly one default at the end to avoid hiding later declarations.
 	active-regionlist 0= abort" END-REGIONLIST without BEGIN-REGIONLIST"
 	active-regionlist to list
 	list REGIONLIST.LAST + @
@@ -319,6 +392,9 @@ DOES> ( -- regionlist )
 \ Search in declaration order and return the first matching region record.
 \ Overlap is intentional: source order is priority for every geometry.  A
 \ well-formed list always reaches its final default before returning zero.
+\ O(number of regions), O(1) auxiliary storage; no sorting or relinking.
+\ Nonregistered lists such as horizon masks may omit a default; zero then
+\ means no match.  This routine does not check coordinate frame or epoch.
 	regionlist REGIONLIST.FIRST + @ to region
 	begin region while
 		RA Dec region region-inside? if region exit then
