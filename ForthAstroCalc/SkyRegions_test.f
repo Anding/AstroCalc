@@ -9,7 +9,6 @@ POLYGON-REGION: midnight
     01 00 00 RA 10 00 00 Dec ADD-REGION-POINT
     01 00 00 RA 30 00 00 Dec ADD-REGION-POINT
     23 00 00 RA 30 00 00 Dec ADD-REGION-POINT
-END-POLYGON
 \ No other dictionary allocation is permitted during polygon construction.
 create regions broad , small , midnight , 0 ,
 create other-regions broad , midnight , 0 ,

@@ -26,6 +26,10 @@ older DLLs without them cannot run these examples. The native project is
 `AstroCalc\AstroCalc.vcxproj`. Solid angles are computed in steradians;
 polygon winding and crossing 00h do not change the area. Region lookup
 uses declaration order unless a list is explicitly sorted.
+Polygons are complete after their last `ADD-REGION-POINT`; no closing word
+is needed. Their construction must not be interrupted by other dictionary
+allocation. Four-corner atlas footprints use great-circle edges, not exact
+constant-declination boundaries.
 
 `AstroCalc_test1\SkyGeometry_test1.c` tests spherical areas and containment.
 After building `Release|Win32`, compile it from a Win32 developer prompt:

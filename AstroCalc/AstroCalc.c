@@ -520,17 +520,6 @@ double spherical_region_area(const int* region)
         half_radius = RAD(ff_to_decimal(kind)) / 2.0;
         return 4.0 * M_PI * sin(half_radius) * sin(half_radius);
     }
-    if (kind == -1)
-    {
-        int width = vertices[2] - vertices[0];
-        if (vertices[1] > vertices[3] || width < -86400 || width > 86400)
-            return NAN;
-        if (width < 0)
-            width += 86400;
-        return RAD(ff_to_decimal(width) * 15.0) *
-            (sin(RAD(ff_to_decimal(vertices[3]))) -
-             sin(RAD(ff_to_decimal(vertices[1]))));
-    }
     if (kind > -3 || kind == INT_MIN)
         return NAN;
     count = -kind;

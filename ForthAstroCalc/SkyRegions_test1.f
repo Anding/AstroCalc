@@ -9,19 +9,20 @@ POLYGON-REGION: region.octant
     0 0 ADD-REGION-POINT
     06 00 00 RA 0 ADD-REGION-POINT
     0 90 00 00 Dec ADD-REGION-POINT
-END-POLYGON
 POLYGON-REGION: region.reversed
     0 90 00 00 Dec ADD-REGION-POINT
     06 00 00 RA 0 ADD-REGION-POINT
     0 0 ADD-REGION-POINT
-END-POLYGON
 POLYGON-REGION: region.wrap
     23 00 00 RA 10 00 00 Dec ADD-REGION-POINT
     01 00 00 RA 10 00 00 Dec ADD-REGION-POINT
     01 00 00 RA 30 00 00 Dec ADD-REGION-POINT
     23 00 00 RA 30 00 00 Dec ADD-REGION-POINT
-END-POLYGON
-23 00 00 RA -30 00 00 Dec 01 00 00 RA 30 00 00 Dec STRIP-REGION: region.strip
+POLYGON-REGION: region.rectangle
+    23 00 00 RA -30 00 00 Dec ADD-REGION-POINT
+    01 00 00 RA -30 00 00 Dec ADD-REGION-POINT
+    01 00 00 RA +30 00 00 Dec ADD-REGION-POINT
+    23 00 00 RA +30 00 00 Dec ADD-REGION-POINT
 create region.list region.sphere , region.octant , region.hemisphere , region.tiny , region.point , 0 ,
 create region.priority region.sphere , region.point , 0 ,
 create region.empty 0 ,
@@ -40,9 +41,11 @@ T{ 01 00 00 RA 20 00 00 Dec region.reversed region-inside? }T -1 ==
 T{ 0 20 00 00 Dec region.wrap region-inside? }T -1 ==
 T{ 12 00 00 RA -20 00 00 Dec region.wrap region-inside? }T 0 ==
 T{ 23 00 00 RA 10 00 00 Dec region.wrap region-inside? }T -1 ==
-T{ 23 00 00 RA -30 00 00 Dec region.strip region-inside? }T -1 ==
-T{ 01 00 00 RA 0 region.strip region-inside? }T 0 ==
-T{ 0 30 00 00 Dec region.strip region-inside? }T 0 ==
+T{ 23 00 00 RA -30 00 00 Dec region.rectangle region-inside? }T -1 ==
+T{ 01 00 00 RA 0 region.rectangle region-inside? }T -1 ==
+\ The great-circle top bows north of the corner declinations.
+T{ 0 30 00 00 Dec region.rectangle region-inside? }T -1 ==
+T{ 0 31 00 00 Dec region.rectangle region-inside? }T 0 ==
 T{ 0 0 region.priority search-regionlist }T region.sphere ==
 T{ 0 0 region.empty search-regionlist }T 0 ==
 T{ ' region.invalid-area catch 0<> }T -1 ==

@@ -15,9 +15,8 @@ int main(void)
         3600, 30 * 3600, 23 * 3600, 30 * 3600 };
     const int shifted[] = { -4, 11 * 3600, 10 * 3600, 13 * 3600, 10 * 3600,
         13 * 3600, 30 * 3600, 11 * 3600, 30 * 3600 };
-    const int strip[] = { -1, 23 * 3600, -30 * 3600, 3600, 30 * 3600 };
-    const int polar_strip[] = { -1, 0, 60 * 3600, 2 * 3600, 90 * 3600 };
-    const int equator_strip[] = { -1, 0, 0, 2 * 3600, 30 * 3600 };
+    const int rectangle[] = { -4, 23 * 3600, -30 * 3600, 3600, -30 * 3600,
+        3600, 30 * 3600, 23 * 3600, 30 * 3600 };
     const int bad[] = { -3, 0, 0, 0, 0, 3600, 0 };
     const int bad_radius[] = { 180 * 3600 + 1, 0, 0 };
     assert(spherical_region_area(point) == 0.0);
@@ -26,8 +25,10 @@ int main(void)
     assert(fabs(spherical_region_area(octant) - M_PI / 2.0) < 1e-12);
     assert(fabs(spherical_region_area(reversed) - spherical_region_area(octant)) < 1e-12);
     assert(fabs(spherical_region_area(wrap) - spherical_region_area(shifted)) < 1e-12);
-    assert(fabs(spherical_region_area(strip) - M_PI / 6.0) < 1e-12);
-    assert(spherical_region_area(polar_strip) < spherical_region_area(equator_strip));
+    // Great-circle edges bow beyond constant-declination corner bounds.
+    assert(spherical_region_area(rectangle) > M_PI / 6.0);
+    assert(spherical_polygon_contains(0, 30 * 3600, rectangle + 1, 4));
+    assert(!spherical_polygon_contains(0, 31 * 3600, rectangle + 1, 4));
     assert(spherical_region_area_compare(tiny, larger) == -1);
     assert(spherical_region_area_compare(larger, tiny) == 1);
     assert(spherical_region_area_compare(wrap, wrap) == 0);
