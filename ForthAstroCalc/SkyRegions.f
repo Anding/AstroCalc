@@ -36,6 +36,18 @@ NEED structured-lists
 
 : region-name ( region -- caddr u ) ITEM-NAME ;
 
+: region-centre { region | RA Dec -- RA Dec }
+\ Circles retain their stored centre; polygons use the mean vertex direction,
+\ not an arithmetic RA/Dec average or a surface-area centroid.
+    region @ 0< if
+        region cell+ region @ negate ADDR RA ADDR Dec spherical_polygon_centre
+        0= abort" Undefined polygon centre"
+        RA Dec
+    else
+        region cell+ dup @ swap cell+ @
+    then
+;
+
 : region-inside? { RA Dec region | kind -- flag }
 \ Circle: compare centre separation with radius. Polygon: pass packed
 \ vertex pairs and the positive count to C; RA wrap needs no special case.

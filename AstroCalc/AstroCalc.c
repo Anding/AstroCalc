@@ -456,6 +456,23 @@ static unit_vector polygon_center(const int* vertices, int count)
     return center;
 }
 
+int spherical_polygon_centre(const int* vertices, int vertex_count, int* ra, int* dec)
+{
+    unit_vector center;
+    double horizontal, tolerance;
+    if (vertices == NULL || vertex_count < 3 || ra == NULL || dec == NULL)
+        return 0;
+    center = polygon_center(vertices, vertex_count);
+    horizontal = hypot(center.x, center.y);
+    tolerance = 1e-12 * vertex_count;
+    if (hypot(horizontal, center.z) <= tolerance)
+        return 0;
+    *ra = horizontal <= tolerance ? 0 :
+        decimal_to_ff(mod24_positive(DEG(atan2(center.y, center.x)) / 15.0)) % 86400;
+    *dec = decimal_to_ff(DEG(atan2(center.z, horizontal)));
+    return 1;
+}
+
 int spherical_polygon_contains(int ra, int dec, const int* vertices, int vertex_count)
 {
     const double epsilon = 1e-12;

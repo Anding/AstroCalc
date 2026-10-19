@@ -30,6 +30,10 @@ Polygons are complete after their last `ADD-REGION-POINT`; no closing word
 is needed. Their construction must not be interrupted by other dictionary
 allocation. Four-corner atlas footprints use great-circle edges, not exact
 constant-declination boundaries.
+`region-centre ( region -- RA Dec )` returns a circle's stored centre or
+the direction of a polygon's mean vertex vector, not its surface-area
+centroid. It handles crossing 00h and returns RA zero at a pole. Coordinates
+retain the region's frame and epoch; for example, `great-square region-centre goto`.
 
 `AstroCalc_test1\SkyGeometry_test1.c` tests spherical areas and containment.
 After building `Release|Win32`, compile it from a Win32 developer prompt:

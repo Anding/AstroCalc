@@ -29,8 +29,16 @@ create region.empty 0 ,
 create region.bad -3 , 0 , 0 , 0 , 0 , 3600 , 0 ,
 : region.invalid-area region.bad region.point angular-area-compare drop ;
 : region.invalid-radius 0 0 -1 CIRCLE-REGION: ;
+create region.balanced -4 , 0 , 0 , 06 00 00 RA , 0 ,
+    12 00 00 RA , 0 , 18 00 00 RA , 0 ,
+: region.undefined-centre region.balanced region-centre 2drop ;
 
 Tstart
+T{ region.octant region-centre }T 03 00 00 RA 35 15 52 Dec ==
+T{ region.reversed region-centre }T 03 00 00 RA 35 15 52 Dec ==
+T{ region.wrap region-centre drop }T 0 ==
+T{ region.rectangle region-centre }T 0 0 ==
+T{ ' region.undefined-centre catch 0<> }T -1 ==
 T{ region.wrap region-name hashS }T s" REGION.WRAP" hashS ==
 T{ 0 0 region.point region-inside? }T -1 ==
 T{ 0 1 region.point region-inside? }T -1 ==

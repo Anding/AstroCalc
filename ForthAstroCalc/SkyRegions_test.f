@@ -15,6 +15,10 @@ create other-regions broad , midnight , 0 ,
 create lists regions , other-regions , 0 ,
 
 Tstart
+\ region-centre returns RA Dec, ready for a mount's goto word.
+\ Polygon centres are mean vertex directions, with RA wrap handled in C.
+T{ small region-centre }T 06 00 00 RA 0 ==
+T{ midnight region-centre midnight region-inside? }T -1 ==
 \ Names come from the dictionary; there are no duplicated IDs or labels.
 T{ small region-name hashS }T s" SMALL" hashS ==
 T{ 06 00 00 RA 0 regions search-regionlist }T broad ==

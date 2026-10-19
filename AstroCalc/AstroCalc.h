@@ -91,6 +91,12 @@ ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
 ASTROCALC_API int spherical_polygon_contains(
     int ra, int dec, const int* vertices, int vertex_count);
 
+// Direction of the mean vertex vector, not the surface-area centroid.
+// Returns 1 on success, 0 for an undefined mean; RA is zero at a pole.
+// Outputs RA in time seconds and Dec in DEGMMSS finite fractions.
+ASTROCALC_API int spherical_polygon_centre(
+    const int* vertices, int vertex_count, int* ra, int* dec);
+
 // Solid angle in steradians, or NaN for invalid geometry.
 // region[0] is a nonnegative circle radius or a negative polygon vertex count
 // (at least three); remaining cells are packed RA,Dec pairs.
