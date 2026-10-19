@@ -91,6 +91,13 @@ ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
 ASTROCALC_API int spherical_polygon_contains(
     int ra, int dec, const int* vertices, int vertex_count);
 
+// Solid angle in steradians, or NaN for invalid geometry.
+// region[0] is a circle radius, a negative polygon vertex count, or -1 for
+// a coordinate strip; remaining cells are packed RA,Dec pairs.
+ASTROCALC_API double spherical_region_area(const int* region);
+// -1 smaller, 0 equal, 1 larger; 2 indicates invalid geometry.
+ASTROCALC_API int spherical_region_area_compare(const int* first, const int* second);
+
 // J2000 to JNOW
 ASTROCALC_API void J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int* RA_JNOW, int* DEC_JNOW);
 

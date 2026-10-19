@@ -1,105 +1,67 @@
-need simple-tester
+NEED SkyRegions
+NEED simple-tester
 
-include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions.f
-
-depth constant skyregions-test-depth
-
-s" Test Regions" s" REGTEST"
-BEGIN-REGIONLIST test-regions
-05 35 17 RA -05 -23 -15 Dec 05 00 00 DEGMMSS
-	s" m42" s" Orion Nebula region" sky-circle M42-region
-23 00 00 RA +15 00 00 Dec 00 30 00 RA +30 00 00 Dec
-	s" pegasus" s" Square of Pegasus" sky-strip Pegasus-region
-BEGIN-SKY-POLYGON
-	23 00 00 RA +10 00 00 Dec SKY-VERTEX
-	01 00 00 RA +10 00 00 Dec SKY-VERTEX
-	01 00 00 RA +30 00 00 Dec SKY-VERTEX
-	23 00 00 RA +30 00 00 Dec SKY-VERTEX
-s" ra-wrap" s" RA wrap polygon"
-END-SKY-POLYGON RA-wrap-region
-s" n-a" s" n/a" sky-default test-n-a
-END-REGIONLIST
-
-BEGIN-SKY-POLYGON
-	23 00 00 RA +30 00 00 Dec SKY-VERTEX
-	01 00 00 RA +30 00 00 Dec SKY-VERTEX
-	01 00 00 RA +10 00 00 Dec SKY-VERTEX
-	23 00 00 RA +10 00 00 Dec SKY-VERTEX
-s" reversed" s" Reversed polygon"
-END-SKY-POLYGON reversed-region
-
-include E:\coding\AstroCalc\ForthAstroCalc\SkyRegions_catalogs.f
-
-0 s" below" s" Below" sky-below below-equator
-02 00 00 RA -10 00 00 Dec 04 00 00 RA +10 00 00 Dec
-    s" band" s" Band" sky-band test-band
-00 00 00 RA -10 00 00 Dec 24 00 00 RA +10 00 00 Dec
-    s" full" s" Full longitude band" sky-band test-full-band
-: invalid-band ( -- )
-    0 1 0 -1 s" invalid" s" Invalid" sky-band
-;
-: invalid-circle ( -- )
-    0 0 -1 s" invalid" s" Invalid" sky-circle
-;
+0 0 1 CIRCLE-REGION: region.point
+0 0 90 00 00 DEGMMSS CIRCLE-REGION: region.hemisphere
+0 0 180 00 00 DEGMMSS CIRCLE-REGION: region.sphere
+0 0 2 CIRCLE-REGION: region.tiny
+POLYGON-REGION: region.octant
+    0 0 ADD-REGION-POINT
+    06 00 00 RA 0 ADD-REGION-POINT
+    0 90 00 00 Dec ADD-REGION-POINT
+END-POLYGON
+POLYGON-REGION: region.reversed
+    0 90 00 00 Dec ADD-REGION-POINT
+    06 00 00 RA 0 ADD-REGION-POINT
+    0 0 ADD-REGION-POINT
+END-POLYGON
+POLYGON-REGION: region.wrap
+    23 00 00 RA 10 00 00 Dec ADD-REGION-POINT
+    01 00 00 RA 10 00 00 Dec ADD-REGION-POINT
+    01 00 00 RA 30 00 00 Dec ADD-REGION-POINT
+    23 00 00 RA 30 00 00 Dec ADD-REGION-POINT
+END-POLYGON
+23 00 00 RA -30 00 00 Dec 01 00 00 RA 30 00 00 Dec STRIP-REGION: region.strip
+create region.list region.sphere , region.octant , region.hemisphere , region.tiny , region.point , 0 ,
+create region.priority region.sphere , region.point , 0 ,
+create region.empty 0 ,
+create region.bad -3 , 0 , 0 , 0 , 0 , 3600 , 0 ,
+: region.invalid-area region.bad region.point angular-area-compare drop ;
+: region.invalid-radius 0 0 -1 CIRCLE-REGION: ;
 
 Tstart
+T{ region.wrap region-name hashS }T s" REGION.WRAP" hashS ==
+T{ 0 0 region.point region-inside? }T -1 ==
+T{ 0 1 region.point region-inside? }T -1 ==
+T{ 0 2 region.point region-inside? }T 0 ==
+T{ 01 00 00 RA 20 00 00 Dec region.octant region-inside? }T -1 ==
+T{ 13 00 00 RA -20 00 00 Dec region.octant region-inside? }T 0 ==
+T{ 01 00 00 RA 20 00 00 Dec region.reversed region-inside? }T -1 ==
+T{ 0 20 00 00 Dec region.wrap region-inside? }T -1 ==
+T{ 12 00 00 RA -20 00 00 Dec region.wrap region-inside? }T 0 ==
+T{ 23 00 00 RA 10 00 00 Dec region.wrap region-inside? }T -1 ==
+T{ 23 00 00 RA -30 00 00 Dec region.strip region-inside? }T -1 ==
+T{ 01 00 00 RA 0 region.strip region-inside? }T 0 ==
+T{ 0 30 00 00 Dec region.strip region-inside? }T 0 ==
+T{ 0 0 region.priority search-regionlist }T region.sphere ==
+T{ 0 0 region.empty search-regionlist }T 0 ==
+T{ ' region.invalid-area catch 0<> }T -1 ==
+T{ ' region.invalid-radius catch 0<> }T -1 ==
+T{ region.octant region.reversed angular-area-compare }T -1 ==
+T{ 123 ' angular-area-compare region.list SORT-LIST }T 123 ==
+T{ region.list @ region.list cell+ @ region.list 2 cells + @
+    region.list 3 cells + @ region.list 4 cells + @ }T
+    region.point region.tiny region.octant region.hemisphere region.sphere ==
+T{ region.priority @ }T region.sphere ==
+' angular-area-compare region.priority SORT-LIST
+T{ 0 0 region.priority search-regionlist }T region.point ==
 
-T{ depth }T skyregions-test-depth ==
-T{ test-regions regionlist-name hashS }T s" Test Regions" hashS ==
-T{ test-regions regionlist-fits-key hashS }T s" REGTEST" hashS ==
-T{ first-regionlist }T test-regions ==
-T{ test-regions next-regionlist }T interstellarum-regions ==
-T{ interstellarum-regions next-regionlist }T visual-regions ==
-T{ visual-regions next-regionlist }T deep-sky-regions ==
-T{ deep-sky-regions next-regionlist }T 0 ==
-T{ M42-region region-id hashS }T s" m42" hashS ==
-T{ M42-region region-label hashS }T s" Orion Nebula region" hashS ==
-
-T{ 05 30 00 RA -06 00 00 Dec M42-region region-inside? }T -1 ==
-T{ 12 00 00 RA 00 00 00 Dec M42-region region-inside? }T 0 ==
-T{ 23 30 00 RA +20 00 00 Dec Pegasus-region region-inside? }T -1 ==
-T{ 00 15 00 RA +20 00 00 Dec Pegasus-region region-inside? }T -1 ==
-T{ 12 00 00 RA 00 00 00 Dec Pegasus-region region-inside? }T 0 ==
-T{ 12 00 00 RA 00 00 00 Dec test-n-a region-inside? }T -1 ==
-
-T{ 00 00 00 RA +20 00 00 Dec RA-wrap-region region-inside? }T -1 ==
-T{ 12 00 00 RA +20 00 00 Dec RA-wrap-region region-inside? }T 0 ==
-T{ 23 00 00 RA +10 00 00 Dec RA-wrap-region region-inside? }T -1 ==
-T{ 00 00 00 RA +20 00 00 Dec reversed-region region-inside? }T -1 ==
-T{ 00 00 00 RA +20 00 00 Dec
-	RA-wrap-region REGION.DATA0 + @
-	RA-wrap-region REGION.DATA1 + @
-	spherical_polygon_contains }T 1 ==
-
-T{ 05 40 00 RA -05 00 00 Dec test-regions search-regionlist }T M42-region ==
-T{ 23 30 00 RA +20 00 00 Dec test-regions search-regionlist }T Pegasus-region ==
-T{ 00 45 00 RA +20 00 00 Dec test-regions search-regionlist }T RA-wrap-region ==
-T{ 12 00 00 RA +50 00 00 Dec test-regions search-regionlist }T test-n-a ==
-
-T{ interstellarum-regions regionlist-fits-key hashS }T s" REGATLAS" hashS ==
-T{ 21 00 00 RA +75 00 00 Dec interstellarum-regions search-regionlist }T interstellarum-chart-2 ==
-T{ 14 00 00 RA +75 00 00 Dec interstellarum-regions search-regionlist }T interstellarum-chart-4 ==
-T{ visual-regions regionlist-fits-key hashS }T s" REGVIS" hashS ==
-T{ 05 30 00 RA 00 00 00 Dec visual-regions search-regionlist }T orion-quadrant ==
-T{ 19 30 00 RA +35 00 00 Dec visual-regions search-regionlist }T summer-triangle ==
-T{ deep-sky-regions regionlist-fits-key hashS }T s" REGDEEP" hashS ==
-T{ 12 27 00 RA +12 43 00 Dec deep-sky-regions search-regionlist }T virgo-galaxy-cluster ==
-T{ 20 30 00 RA +40 00 00 Dec deep-sky-regions search-regionlist }T cygnus-milky-way ==
-T{ 00 00 00 RA -60 00 00 Dec deep-sky-regions search-regionlist }T deep-sky-n-a ==
-T{ 12 00 00 RA -1 below-equator region-inside? }T -1 ==
-T{ 12 00 00 RA 0 below-equator region-inside? }T 0 ==
-T{ 02 00 00 RA -10 00 00 Dec test-band region-inside? }T -1 ==
-T{ 04 00 00 RA +10 00 00 Dec test-band region-inside? }T -1 ==
-T{ 02 00 00 RA 1- 0 test-band region-inside? }T 0 ==
-T{ 04 00 00 RA 1+ 0 test-band region-inside? }T 0 ==
-T{ 03 00 00 RA -10 00 00 Dec 1- test-band region-inside? }T 0 ==
-T{ 03 00 00 RA +10 00 00 Dec 1+ test-band region-inside? }T 0 ==
-T{ 00 00 00 RA 0 test-full-band region-inside? }T -1 ==
-T{ 12 00 00 RA 0 test-full-band region-inside? }T -1 ==
-T{ 23 59 59 RA 0 test-full-band region-inside? }T -1 ==
-T{ 24 00 00 RA 0 test-full-band region-inside? }T -1 ==
-T{ ' invalid-band catch 0<> }T -1 ==
-T{ ' invalid-circle catch 0<> }T -1 ==
-T{ depth }T skyregions-test-depth ==
-
-Tend
+include "%idir%\SkyRegions_catalogs.f"
+T{ 21 00 00 RA 75 00 00 Dec REGATLAS search-regionlist }T chart-2 ==
+T{ 14 00 00 RA 75 00 00 Dec REGATLAS search-regionlist }T chart-4 ==
+T{ 05 30 00 RA 0 REGVIS search-regionlist }T orion-quadrant ==
+T{ 19 30 00 RA 35 00 00 Dec REGVIS search-regionlist }T summer-triangle ==
+T{ 12 27 00 RA 12 43 00 Dec REGDEEP search-regionlist }T virgo-cluster ==
+T{ 20 30 00 RA 40 00 00 Dec REGDEEP search-regionlist }T cygnus-milky-way ==
+T{ 0 -60 00 00 Dec REGDEEP search-regionlist }T 0 ==
+TEnd

@@ -47,6 +47,10 @@ Extern: int "C" spherical_polygon_contains(int RA, int Dec, int * vertices, int 
 \ Test whether a coordinate is inside a convex spherical polygon
 \ vertices contains packed RA, Dec pairs in declaration order
 
+Extern: int "C" spherical_region_area_compare(int * first, int * second) ;
+\ Compare spherical solid angles: -1 smaller, 0 equal, 1 larger, 2 invalid.
+\ Regions use the compact circle/polygon/strip representation in SkyRegions.f.
+
 Extern: void "C" J2000toJNOW(int RA_J2000, int DEC_J2000, int yyyymmdd, int * RA_JNOW, int * DEC_JNOW);
 \ Convert J2000 to JNOW
 \ RA is expressed in integer seconds

@@ -5,6 +5,8 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <limits.h>
+#include <float.h>
 
 // Enable logging by defining ENABLE_ASTRO_LOG (e.g. in this file or via compiler define).
 // #define ENABLE_ASTRO_LOG 1
@@ -425,11 +427,40 @@ static unit_vector equatorial_unit_vector(int ra, int dec)
     return result;
 }
 
+static double vector_dot(unit_vector a, unit_vector b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+static unit_vector vector_cross(unit_vector a, unit_vector b)
+{
+    unit_vector result = {
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    };
+    return result;
+}
+
+static unit_vector polygon_center(const int* vertices, int count)
+{
+    unit_vector center = { 0.0, 0.0, 0.0 };
+    int i;
+    for (i = 0; i < count; i++)
+    {
+        unit_vector vertex = equatorial_unit_vector(vertices[2 * i], vertices[2 * i + 1]);
+        center.x += vertex.x;
+        center.y += vertex.y;
+        center.z += vertex.z;
+    }
+    return center;
+}
+
 int spherical_polygon_contains(int ra, int dec, const int* vertices, int vertex_count)
 {
     const double epsilon = 1e-12;
     unit_vector point;
-    double reference_sign = 0.0;
+    unit_vector center;
     int i;
 
     if (vertices == NULL || vertex_count < 3)
@@ -438,19 +469,16 @@ int spherical_polygon_contains(int ra, int dec, const int* vertices, int vertex_
     }
 
     point = equatorial_unit_vector(ra, dec);
+    center = polygon_center(vertices, vertex_count);
 
     for (i = 0; i < vertex_count; i++)
     {
         int next = (i + 1) % vertex_count;
         unit_vector a = equatorial_unit_vector(vertices[2 * i], vertices[2 * i + 1]);
         unit_vector b = equatorial_unit_vector(vertices[2 * next], vertices[2 * next + 1]);
-        unit_vector normal = {
-            a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x
-        };
-        double normal_length_squared =
-            normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+        unit_vector normal = vector_cross(a, b);
+        double normal_length_squared = vector_dot(normal, normal);
+        double inward = vector_dot(normal, center);
         double side;
 
         if (normal_length_squared <= epsilon * epsilon)
@@ -458,23 +486,86 @@ int spherical_polygon_contains(int ra, int dec, const int* vertices, int vertex_
             return 0;
         }
 
-        side = normal.x * point.x + normal.y * point.y + normal.z * point.z;
-        if (fabs(side) <= epsilon)
-        {
-            continue;
-        }
-
-        if (reference_sign == 0.0)
-        {
-            reference_sign = side;
-        }
-        else if ((reference_sign > 0.0) != (side > 0.0))
+        // Anchor the edge orientation to the polygon, not the query point;
+        // otherwise its antipodal region would also pass every edge test.
+        if (inward == 0.0)
+            return 0;
+        side = vector_dot(normal, point) / sqrt(normal_length_squared);
+        if ((inward > 0.0 && side < -epsilon) ||
+            (inward < 0.0 && side > epsilon))
         {
             return 0;
         }
     }
 
     return 1;
+}
+
+double spherical_region_area(const int* region)
+{
+    int kind;
+    const int* vertices;
+    unit_vector center;
+    double length, area = 0.0;
+    int i, count;
+    if (region == NULL)
+        return NAN;
+    kind = region[0];
+    vertices = region + 1;
+    if (kind >= 0)
+    {
+        double half_radius;
+        if (kind > 180 * 3600)
+            return NAN;
+        half_radius = RAD(ff_to_decimal(kind)) / 2.0;
+        return 4.0 * M_PI * sin(half_radius) * sin(half_radius);
+    }
+    if (kind == -1)
+    {
+        int width = vertices[2] - vertices[0];
+        if (vertices[1] > vertices[3] || width < -86400 || width > 86400)
+            return NAN;
+        if (width < 0)
+            width += 86400;
+        return RAD(ff_to_decimal(width) * 15.0) *
+            (sin(RAD(ff_to_decimal(vertices[3]))) -
+             sin(RAD(ff_to_decimal(vertices[1]))));
+    }
+    if (kind > -3 || kind == INT_MIN)
+        return NAN;
+    count = -kind;
+    center = polygon_center(vertices, count);
+    length = sqrt(vector_dot(center, center));
+    if (length < 1e-12)
+        return NAN;
+    center.x /= length;
+    center.y /= length;
+    center.z /= length;
+    for (i = 0; i < count; i++)
+    {
+        unit_vector a = equatorial_unit_vector(vertices[2 * i], vertices[2 * i + 1]);
+        int next = (i + 1) % count;
+        unit_vector b = equatorial_unit_vector(vertices[2 * next], vertices[2 * next + 1]);
+        unit_vector normal = vector_cross(a, b);
+        double numerator = vector_dot(center, normal);
+        double denominator = 1.0 + vector_dot(center, a) +
+            vector_dot(a, b) + vector_dot(b, center);
+        if (vector_dot(normal, normal) < 1e-24 || numerator == 0.0)
+            return NAN;
+        area += 2.0 * atan2(numerator, denominator);
+    }
+    return fabs(area);
+}
+
+int spherical_region_area_compare(const int* first, const int* second)
+{
+    double a = spherical_region_area(first);
+    double b = spherical_region_area(second);
+    if (!isfinite(a) || !isfinite(b))
+        return 2;
+    if (fabs(a - b) <= 16.0 * DBL_EPSILON * fmax(a, b))
+        return 0;
+    return (a > b) - (a < b);
 }
 
 // Convert J2000 <> JNOW
