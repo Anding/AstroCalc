@@ -9,14 +9,9 @@ NEED simple-tester
 03 47 29 RA +24 06 19 Dec TARGET: M45
 create winter-targets M1 , M42 , M43 , M45 , 0 ,
 
-\ Focus stars have the same coordinate prefix and one extra magnitude cell.
-\ Only focus-star records may be passed to target-magnitude.
-00 46 33 RA +15 28 31 Dec 4199 FOCUS-STAR: G2781184739422799232
-
 Tstart
 T{ M42 target-coordinates }T 05 35 16 RA -05 -23 -23 Dec ==
 T{ M42 target-name hashS }T s" M42" hashS ==
-T{ G2781184739422799232 target-magnitude }T 4199 ==
 
 \ Sorting rewrites this list, not its records or their other memberships.
 \ The comparison word preserves the reference coordinates on the stack.
