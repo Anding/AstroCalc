@@ -30,10 +30,10 @@ Polygons are complete after their last `ADD-REGION-POINT`; no closing word
 is needed. Their construction must not be interrupted by other dictionary
 allocation. Four-corner atlas footprints use great-circle edges, not exact
 constant-declination boundaries.
-`region-centre ( region -- RA Dec )` returns a circle's stored centre or
+`region-centre ( region -- RA Dec 0 | ior )` returns a circle's stored centre or
 the direction of a polygon's mean vertex vector, not its surface-area
 centroid. It handles crossing 00h and returns RA zero at a pole. Coordinates
-retain the region's frame and epoch; for example, `great-square region-centre goto`.
+retain the region's frame and epoch. Check `ior` before passing coordinates to `goto`.
 
 `AstroCalc_test1\SkyGeometry_test1.c` tests spherical areas and containment.
 After building `Release|Win32`, compile it from a Win32 developer prompt:
@@ -42,3 +42,10 @@ After building `Release|Win32`, compile it from a Win32 developer prompt:
 cl /nologo /W4 /Fe:AstroCalc\Release\SkyGeometry_test1.exe /Fo:AstroCalc\Release\SkyGeometry_test1.obj AstroCalc_test1\SkyGeometry_test1.c AstroCalc\Release\AstroCalc.lib
 .\AstroCalc\Release\SkyGeometry_test1.exe
 ```
+# Ordinary errors
+
+`HZtoJ2000` and `region-centre` return `( coordinates 0 | ior )`.
+Check the native `ior` before using coordinates; missing UTC dates and undefined
+polygon centres report the error and return no fabricated position.
+Invalid circle declarations report the error without creating a region.
+Invalid area comparisons report the error and return false.

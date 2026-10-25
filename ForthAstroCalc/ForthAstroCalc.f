@@ -210,11 +210,14 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
     J2000toJNOW ( --) RA_JNOW DEC_JNOW
 ;
 
-: HZtoJ2000 ( alt az -- RA_J2000 DEC_J2000 )
-    SkyDate 0= abort" Horizon conversion needs a UTC date"
+: HZtoJ2000 ( alt az -- RA_J2000 DEC_J2000 0 | ior )
+    SkyDate 0= if
+        2drop cr ." Horizon conversion needs a UTC date" cr -1 exit
+    then
     HZtoEQ
     swap LST swap - %clock swap
     SkyDate J2000
+    0
 ;
 
 : J2000toHZ { RA_J2000 DEC_J2000 YYMMDD LST lat -- alt az }

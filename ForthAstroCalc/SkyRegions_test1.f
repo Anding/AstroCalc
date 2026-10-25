@@ -27,18 +27,15 @@ create region.list region.sphere , region.octant , region.hemisphere , region.ti
 create region.priority region.sphere , region.point , 0 ,
 create region.empty 0 ,
 create region.bad -3 , 0 , 0 , 0 , 0 , 3600 , 0 ,
-: region.invalid-area region.bad region.point angular-area-compare drop ;
-: region.invalid-radius 0 0 -1 CIRCLE-REGION: ;
 create region.balanced -4 , 0 , 0 , 06 00 00 RA , 0 ,
     12 00 00 RA , 0 , 18 00 00 RA , 0 ,
-: region.undefined-centre region.balanced region-centre 2drop ;
 
 Tstart
-T{ region.octant region-centre }T 03 00 00 RA 35 15 52 Dec ==
-T{ region.reversed region-centre }T 03 00 00 RA 35 15 52 Dec ==
-T{ region.wrap region-centre drop }T 0 ==
-T{ region.rectangle region-centre }T 0 0 ==
-T{ ' region.undefined-centre catch 0<> }T -1 ==
+T{ region.octant region-centre }T 03 00 00 RA 35 15 52 Dec 0 ==
+T{ region.reversed region-centre }T 03 00 00 RA 35 15 52 Dec 0 ==
+T{ region.wrap region-centre drop drop }T 0 ==
+T{ region.rectangle region-centre }T 0 0 0 ==
+T{ region.balanced region-centre }T -1 ==
 T{ region.wrap region-name hashS }T s" REGION.WRAP" hashS ==
 T{ 0 0 region.point region-inside? }T -1 ==
 T{ 0 1 region.point region-inside? }T -1 ==
@@ -56,8 +53,9 @@ T{ 0 30 00 00 Dec region.rectangle region-inside? }T -1 ==
 T{ 0 31 00 00 Dec region.rectangle region-inside? }T 0 ==
 T{ 0 0 region.priority search-regionlist }T region.sphere ==
 T{ 0 0 region.empty search-regionlist }T 0 ==
-T{ ' region.invalid-area catch 0<> }T -1 ==
-T{ ' region.invalid-radius catch 0<> }T -1 ==
+T{ region.bad region.point angular-area-compare }T 0 ==
+T{ 0 0 -1 CIRCLE-REGION: region.invalid-radius }T ==
+T{ [DEFINED] region.invalid-radius }T 0 ==
 T{ region.octant region.reversed angular-area-compare }T -1 ==
 T{ 123 ' angular-area-compare region.list SORT-LIST }T 123 ==
 T{ region.list @ region.list cell+ @ region.list 2 cells + @
@@ -75,4 +73,8 @@ T{ 19 30 00 RA 35 00 00 Dec REGVIS search-regionlist }T summer-triangle ==
 T{ 12 27 00 RA 12 43 00 Dec REGDEEP search-regionlist }T virgo-cluster ==
 T{ 20 30 00 RA 40 00 00 Dec REGDEEP search-regionlist }T cygnus-milky-way ==
 T{ 0 -60 00 00 Dec REGDEEP search-regionlist }T 0 ==
-TEnd
+SkyDate constant region.saved-date
+0 -> SkyDate
+T{ 45 0 HZtoJ2000 }T -1 ==
+region.saved-date -> SkyDate
+Tend

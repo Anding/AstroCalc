@@ -12,7 +12,9 @@ NEED structured-lists
 
 : CIRCLE-REGION: ( RA Dec radius <name> -- )
 \ Store the radius first so its nonnegative sign identifies a circle.
-    dup 0< over 180 00 00 DEGMMSS > or abort" Invalid circle radius"
+    dup 0< over 180 00 00 DEGMMSS > or if
+        3drop bl word drop cr ." Invalid circle radius" cr exit
+    then
     create , swap , ,
 ;
 
@@ -36,15 +38,15 @@ NEED structured-lists
 
 : region-name ( region -- caddr u ) ITEM-NAME ;
 
-: region-centre { region | RA Dec -- RA Dec }
+: region-centre { region | RA Dec -- RA Dec 0 | ior }
 \ Circles retain their stored centre; polygons use the mean vertex direction,
 \ not an arithmetic RA/Dec average or a surface-area centroid.
     region @ 0< if
         region cell+ region @ negate ADDR RA ADDR Dec spherical_polygon_centre
-        0= abort" Undefined polygon centre"
-        RA Dec
+        0= if cr ." Undefined polygon centre" cr -1 exit then
+        RA Dec 0
     else
-        region cell+ dup @ swap cell+ @
+        region cell+ dup @ swap cell+ @ 0
     then
 ;
 
@@ -75,6 +77,6 @@ NEED structured-lists
 \ Native results are -1/0/1 (smaller/equal/larger), or 2 for invalid geometry.
 \ Accept equality so SORT-LIST retains declaration order for equal areas.
     spherical_region_area_compare
-    dup 2 = abort" Invalid region geometry for area comparison"
+    dup 2 = if drop cr ." Invalid region geometry for area comparison" cr 0 exit then
     0> 0=
 ;
