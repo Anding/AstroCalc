@@ -1,5 +1,5 @@
 \ Executable tutorial: geometry is independent of list membership and order.
-NEED SkyRegions
+NEED ForthAstroCalc
 NEED simple-tester
 
 06 00 00 RA 0 05 00 00 DEGMMSS CIRCLE-REGION: broad

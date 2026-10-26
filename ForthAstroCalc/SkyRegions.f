@@ -7,7 +7,6 @@
 \ Containment includes boundaries; overlapping regions use list priority.
 \ The caller supplies a common coordinate frame and epoch.
 \ Keep this cell layout consistent with AstroCalc.h and its native routines.
-NEED AstroCalc
 NEED structured-lists
 
 : CIRCLE-REGION: ( RA Dec radius <name> -- )

@@ -2,7 +2,6 @@
 \ Coordinates must share a frame and epoch when compared. No visibility,
 \ sky snapshot, equipment state or list membership is stored in a record.
 \ Lists use ForthBase's ordinary zero-terminated arrays of references.
-NEED AstroCalc
 NEED structured-lists
 
 : TARGET: ( RA Dec <name> -- )

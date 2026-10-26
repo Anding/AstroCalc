@@ -1,4 +1,4 @@
-NEED SkyRegions
+NEED ForthAstroCalc
 NEED simple-tester
 
 0 0 1 CIRCLE-REGION: region.point

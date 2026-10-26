@@ -1,5 +1,5 @@
 \ Executable tutorial: targets are records; lists contain references.
-NEED TargetLists
+NEED ForthAstroCalc
 NEED simple-tester
 
 \ J2000 positions, OpenNGC v20260501 (CC-BY-SA-4.0).
