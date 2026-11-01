@@ -92,13 +92,13 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 	date_after_epoch ~~~
 ;
 
-\ convert a full calendar date and time to a two cell date-time representation
+\ Convert a full calendar date and time to one cell of epoch seconds.
 : EpochTime ( yyyy mm dd hh mm ss -- T)
-\ time (in seconds) is the top-of-stack, date (in days since the Epoch) is next-on-stack
+\ Return the complete date and time as integer seconds since the epoch.
 	>R >R >R EpochDays R> R> R> ( days hh mm ss) TimeSpan
 ;
 
-\ convert a two cell date-time representation to a full calendar date and time
+\ Convert one cell of epoch seconds to a full calendar date and time.
 : fromEpochTime ( T -- yyyy mm dd hh mm ss)
     1DAY /mod swap              ( days seconds)
     >R fromEpochDays R> ~~~     ( yyyy mm dd hh mm ss)
