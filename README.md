@@ -6,6 +6,14 @@ Documentation for these small Forth modules lives with the code:
 - [`NextTimes.f`](ForthAstroCalc/NextTimes.f) supplies `LST-next` and
   `localtime-next`; [`NextTimes_test.f`](ForthAstroCalc/NextTimes_test.f)
   demonstrates midnight, sidereal recurrence and Windows daylight-saving rules.
+  `ascending-next ( RA Dec altitude -- epoch|0 )` and `descending-next` accept
+  J2000 coordinates, reuse `JNOW`, and schedule geometric altitude crossings
+  using configured north-positive `Latitude` and east-positive `Longitude`.
+  Zero means no crossing (including a tangent); no refraction is applied.
+  Coordinates are frozen at today's UTC date: these are scheduling estimates.
+  [`AltitudeNext_test.f`](ForthAstroCalc/AltitudeNext_test.f) exercises both branches.
+  Check for zero before passing a result to `gather-until`, where zero means
+  an indefinite run rather than an unavailable crossing.
 - [`SkyRegions.f`](ForthAstroCalc/SkyRegions.f) documents the geometry algorithms
   and record conventions; [`SkyRegions_test.f`](ForthAstroCalc/SkyRegions_test.f)
   is an executable user tutorial for named regions, explicit lists and area sorting.

@@ -82,6 +82,10 @@ ASTROCALC_API void EQtoHZ_ext(int H, int dec, int lat, int* alt, int* az);
 // Convert horizon to equatorial coordinates
 ASTROCALC_API void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec);
 
+// Positive crossing hour angle in time seconds, or -1 for no crossing.
+// Angles use DEGMMSS; a tangent at culmination is not a crossing.
+ASTROCALC_API int altitude_hour_angle(int dec, int lat, int alt);
+
 // Compute the angular separation of two coordinates
 ASTROCALC_API int ang_sep(int H1, int dec1, int H2, int dec2);
 

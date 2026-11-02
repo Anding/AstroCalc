@@ -78,3 +78,22 @@ Extern: int WINAPI SystemTimeToTzSpecificLocalTimeEx( int * dynamic, int * utc, 
 \ Skip nonexistent dates/times; choose the next occurrence when a clock repeats.
     astrocalc.epoch-now 0 localtime-next-at
 ;
+
+: altitude-next-at { RA Dec altitude descending? current | H -- epoch|0 }
+\ Schedule J2000 coordinates using JNOW at the sampled UTC date.
+\ Geometric altitude only; freeze coordinates for this next sidereal cycle.
+    RA Dec current 1DAY / date_after_epoch JNOW -> Dec -> RA
+    Dec Latitude altitude altitude_hour_angle -> H
+    H 0< if 0 exit then
+    RA descending? if H + else H - then %clock current LST-next-at
+;
+
+: ascending-next ( RA Dec altitude -- epoch|0 )
+\ Next rising crossing for J2000 coordinates; zero means this altitude is never crossed.
+    false astrocalc.epoch-now altitude-next-at
+;
+
+: descending-next ( RA Dec altitude -- epoch|0 )
+\ Next setting crossing for J2000 coordinates; zero also covers culmination tangencies.
+    true astrocalc.epoch-now altitude-next-at
+;

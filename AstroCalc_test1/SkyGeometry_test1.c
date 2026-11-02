@@ -4,6 +4,16 @@
 
 int main(void)
 {
+    assert(altitude_hour_angle(0, 0, 0) == 6 * 3600);
+    assert(altitude_hour_angle(0, 0, 30 * 3600) == 4 * 3600);
+    assert(altitude_hour_angle(80 * 3600, 45 * 3600, 0) == -1);
+    assert(altitude_hour_angle(-80 * 3600, 45 * 3600, 0) == -1);
+    assert(altitude_hour_angle(80 * 3600, 45 * 3600, 45 * 3600) > 0);
+    assert(altitude_hour_angle(-80 * 3600, -45 * 3600, 0) == -1);
+    assert(altitude_hour_angle(30 * 3600, 60 * 3600, 0) == -1);
+    assert(altitude_hour_angle(30 * 3600, 60 * 3600, 60 * 3600) == -1);
+    assert(altitude_hour_angle(0, 90 * 3600, 0) == -1);
+    assert(altitude_hour_angle(90 * 3600, 0, 0) == -1);
     const int point[] = { 0, 0, 0 };
     const int hemisphere[] = { 90 * 3600, 0, 0 };
     const int sphere[] = { 180 * 3600, 0, 0 };

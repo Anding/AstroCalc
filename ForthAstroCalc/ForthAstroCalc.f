@@ -39,6 +39,9 @@ Extern: void "C" HZtoEQ_ext(int alt, int az, int lat, int * H, int * dec) ;
 \ alt, az, dec and lat are expressed in DEGMMSS format
 \ H is expressed in integer seconds
 
+Extern: int "C" altitude_hour_angle(int dec, int lat, int alt);
+\ Return the positive crossing hour angle in time seconds, or -1 if none.
+
 Extern: int "C" ang_sep(int H1, int dec1, int H2, int dec2) ;
 \ Compute the angular separation between two coordinates
 \ dec is expressed in DEGMMSS format
@@ -181,8 +184,6 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 	%clock
 ;
 
-include "%idir%\NextTimes.f"
-
 \ Coorodinate conversion ********************************************************************************
 
 : EQtoHZ-at ( H dec lat -- alt az) { | alt az -- }
@@ -244,3 +245,5 @@ include "%idir%\NextTimes.f"
 	alt 0 >
 	az start-az end-az in-azimuth-sector? 0= and
 ;
+
+include "%idir%\NextTimes.f"

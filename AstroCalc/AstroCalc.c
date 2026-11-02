@@ -387,6 +387,21 @@ void HZtoEQ_ext(int alt, int az, int lat, int* H, int* dec)
     *dec = decimal_to_ff(dec_dml);
 }
 
+// Solve sin(alt) = sin(lat)sin(dec) + cos(lat)cos(dec)cos(H).
+int altitude_hour_angle(int dec, int lat, int alt)
+{
+    double d = RAD(ff_to_decimal(dec));
+    double p = RAD(ff_to_decimal(lat));
+    double a = RAD(ff_to_decimal(alt));
+    double denominator = cos(p) * cos(d);
+    double c;
+
+    if (fabs(denominator) < 1e-12) return -1;
+    c = (sin(a) - sin(p) * sin(d)) / denominator;
+    if (c <= -1.0 + 1e-12 || c >= 1.0 - 1e-12) return -1;
+    return SEC(DEG(acos(c)) / 15.0);
+}
+
 // Compute the angular separation of two coordinates
 int ang_sep(int H1, int dec1, int H2, int dec2)
 // H is expressed in integer seconds
