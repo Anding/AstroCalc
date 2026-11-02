@@ -16,7 +16,7 @@ NEED simple-tester
 
 crossing.RA crossing.Dec 30 00 00 ~ false crossing.now altitude-next-at
     constant crossing.rise
-crossing.RA crossing.Dec 30 00 00 ~ true crossing.now altitude-next-at
+crossing.RA crossing.Dec 30 00 00 ~ true crossing.rise 120 + altitude-next-at
     constant crossing.set
 
 Tstart
@@ -35,22 +35,39 @@ T{ crossing.rise
    Latitude 30 00 00 ~ altitude_hour_angle - %clock
    crossing.now LST-next-at = }T true ==
 
-\ A passed rising event schedules the next cycle, not a time in the past.
+\ Rising is unavailable when already above, even while setting; setting is the reverse.
 T{ crossing.RA crossing.Dec 30 00 00 ~ false crossing.rise 120 +
-   altitude-next-at crossing.rise - 86165 - abs 2 <= }T true ==
+   altitude-next-at }T 0 ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ false crossing.set 120 -
+   altitude-next-at }T 0 ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ true crossing.now
+   altitude-next-at }T 0 ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ true crossing.set 120 +
+   altitude-next-at }T 0 ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ false crossing.set 120 +
+   altitude-next-at crossing.set > }T true ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ true crossing.set 120 -
+   altitude-next-at crossing.set - abs 2 <= }T true ==
 
 \ A circumpolar star has no horizon crossing, but can cross a higher altitude.
 T{ 0 80 00 00 ~ 0 ascending-next }T 0 ==
 T{ 0 80 00 00 ~ 0 descending-next }T 0 ==
 T{ 0 -80 00 00 ~ 0 ascending-next }T 0 ==
 T{ 0 -80 00 00 ~ 0 descending-next }T 0 ==
-T{ 0 80 00 00 ~ Latitude ascending-next astrocalc.epoch-now > }T true ==
+\ Choose the branch appropriate to the star's current side of the higher altitude.
+: crossing.circumpolar-next ( -- epoch )
+\ Schedule a reachable circumpolar altitude using the present altitude only.
+    0 80 00 00 ~ crossing.now 1DAY / date_after_epoch JNOW
+    swap crossing.now EpochTimetoGST GSTtoLST RAtoHA swap Latitude EQtoHZ-at drop
+    Latitude > >R
+    0 80 00 00 ~ Latitude R> crossing.now altitude-next-at ;
+T{ crossing.circumpolar-next crossing.now > }T true ==
 
 \ Southern latitude uses the same geometry and signs.
 -22 -18 00 ~ -> Latitude
 T{ 0 -80 00 00 ~ 0 descending-next }T 0 ==
 T{ 0 80 00 00 ~ 0 ascending-next }T 0 ==
-T{ crossing.RA crossing.Dec 30 00 00 ~ descending-next
-   astrocalc.epoch-now > }T true ==
+T{ crossing.RA crossing.Dec 30 00 00 ~ false crossing.now altitude-next-at
+   crossing.now > }T true ==
 T{ depth }T 0 ==
 Tend

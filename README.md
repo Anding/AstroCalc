@@ -10,6 +10,8 @@ Documentation for these small Forth modules lives with the code:
   J2000 coordinates, reuse `JNOW`, and schedule geometric altitude crossings
   using configured north-positive `Latitude` and east-positive `Longitude`.
   Zero means no crossing (including a tangent); no refraction is applied.
+  Rising also returns zero if already above the altitude; setting returns zero
+  if already below it, regardless of the object's current direction of travel.
   Coordinates are frozen at today's UTC date: these are scheduling estimates.
   [`AltitudeNext_test.f`](ForthAstroCalc/AltitudeNext_test.f) exercises both branches.
   Results pass directly to `gather-until`: zero safely returns immediately
