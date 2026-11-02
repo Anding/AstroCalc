@@ -12,8 +12,8 @@ Documentation for these small Forth modules lives with the code:
   Zero means no crossing (including a tangent); no refraction is applied.
   Coordinates are frozen at today's UTC date: these are scheduling estimates.
   [`AltitudeNext_test.f`](ForthAstroCalc/AltitudeNext_test.f) exercises both branches.
-  Check for zero before passing a result to `gather-until`, where zero means
-  an indefinite run rather than an unavailable crossing.
+  Results pass directly to `gather-until`: zero safely returns immediately
+  for an unavailable crossing, without starting exposures.
 - [`SkyRegions.f`](ForthAstroCalc/SkyRegions.f) documents the geometry algorithms
   and record conventions; [`SkyRegions_test.f`](ForthAstroCalc/SkyRegions_test.f)
   is an executable user tutorial for named regions, explicit lists and area sorting.
