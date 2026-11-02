@@ -108,6 +108,15 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
     >R fromEpochDays R> ~~~     ( yyyy mm dd hh mm ss)
 ;
 
+: .EpochTime ( T -- )
+\ Print epoch seconds as YYYY-MM-DD HH:MM:SS, without timezone conversion or newline.
+    base @ >R decimal
+    fromEpochTime ~ >R
+    '-' '-' 0 ~~~custom$ type space
+    R> .RA
+    R> base !
+;
+
 \ Date and time arithmetic *****************************************************************************	
 
 : %clock ( T - T)

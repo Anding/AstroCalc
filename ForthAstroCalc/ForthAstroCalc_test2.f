@@ -21,6 +21,15 @@ T{ -90061 fromTimeSpan }T -1 -1 -1 -1 ==
 T{ 2017 10 12 12 30 45 EpochTime }T 245593845 ==
 T{ 245593845 fromEpochTime }T 2017 10 12 12 30 45 ==
 
+\ Printing consumes only the epoch and preserves BASE; transcript checks verify text.
+." EPOCH-PRINT[" 2026 1 2 3 4 5 EpochTime .EpochTime ." ]" CR
+." EPOCH-MIDNIGHT[" 2028 2 29 0 0 0 EpochTime .EpochTime ." ]" CR
+2026 12 31 23 59 59 EpochTime constant epoch.test-print
+hex
+T{ epoch.test-print .EpochTime base @ }T 10 ==
+decimal CR
+T{ depth }T 0 ==
+
 CR ." Date and time arithmetic" CR
 T{ 36 00 00 ~ %clock }T 12 00 00 ~ ==
 T{ -26 00 00 ~ %clock }T 22 00 00 ~ ==
