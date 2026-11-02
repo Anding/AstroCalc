@@ -48,8 +48,8 @@ T{ 2026 01 30 10 00 00 EpochTime UTtoLT }T 2026 01 30 18 00 00 EpochTime  ==
 T{ 2026 01 30 18 00 00 EpochTime LTtoUT }T 2026 01 30 10 00 00 EpochTime  ==
 
 64 00 00 ~ -> Longitude
-T{ 04 40 05 ~ GSTtoLST }T 00 24 05 ~ ==
-T{ 00 24 05 ~ LSTtoGST }T 04 40 05 ~ ==
+T{ 04 40 05 ~ GSTtoLST }T 08 56 05 ~ ==
+T{ 08 56 05 ~ LSTtoGST }T 04 40 05 ~ ==
 
 T{ 1980 04 22 ~ 14 36 52 ~ UTtoGST }T 04 40 06 ~ ==
 T{ 1980 04 22 ~ 04 40 05 ~ GSTtoUT }T 14 36 51 ~ ==

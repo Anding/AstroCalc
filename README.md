@@ -3,6 +3,9 @@ Astronomical calculations in C and Forth for telescope control, based on Duffett
 
 Documentation for these small Forth modules lives with the code:
 
+- [`NextTimes.f`](ForthAstroCalc/NextTimes.f) supplies `LST-next` and
+  `localtime-next`; [`NextTimes_test.f`](ForthAstroCalc/NextTimes_test.f)
+  demonstrates midnight, sidereal recurrence and Windows daylight-saving rules.
 - [`SkyRegions.f`](ForthAstroCalc/SkyRegions.f) documents the geometry algorithms
   and record conventions; [`SkyRegions_test.f`](ForthAstroCalc/SkyRegions_test.f)
   is an executable user tutorial for named regions, explicit lists and area sorting.

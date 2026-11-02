@@ -1,5 +1,6 @@
 \ Astronomical calculations based on Duffett-Smith and Zwart, "Practical Astronomy"
 need FiniteFractions
+need windows
 
 \ Interface with the C language library rountines *******************************************************
 
@@ -170,15 +171,17 @@ Extern: void "C" JNOWtoJ2000(int RA_JNOW, int DEC_JNOW, int yyyymmdd, int * RA_J
 
 : GSTtoLST ( T -- T)
 \ convert GST to LST    
-	longitude 15 / -
+	longitude 15 / +
 	%clock
 ;
 
 : LSTtoGST ( T -- T)
 \ convert LST to GST    
-	longitude 15 / +
+	longitude 15 / -
 	%clock
 ;
+
+include "%idir%\NextTimes.f"
 
 \ Coorodinate conversion ********************************************************************************
 
